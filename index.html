@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeDelulu Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                        display: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        paper: '#fdfdfd',
+                        ink: '#333333',
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            300: '#d6d3d1',
+                            400: '#a8a29e',
+                            500: '#78716c',
+                            600: '#57534e',
+                            700: '#44403c',
+                            800: '#292524',
+                            900: '#1c1917',
+                            950: '#0c0a09',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #fdfdfd;
+            color: #333333;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Dark Mode Body Override */
+        html.dark body {
+            background-color: #0c0a09;
+            color: #e7e5e4;
+        }
+
+        /* Editor specific styles */
+        .editor-content {
+            outline: none;
+            min-height: 80vh;
+        }
+        
+        /* Placeholder for contenteditable */
+        [contenteditable]:empty:before {
+            content: attr(data-placeholder);
+            color: #a8a29e;
+            pointer-events: none;
+            display: block;
+        }
+        html.dark [contenteditable]:empty:before {
+            color: #57534e;
+        }
+
+        /* Rich Text Styling in Editor */
+        .editor-content blockquote {
+            border-left: 4px solid #d6d3d1;
+            padding-left: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+            color: #57534e;
+        }
+        html.dark .editor-content blockquote {
+            border-color: #44403c;
+            color: #a8a29e;
+        }
+        
+        /* Lists Indentation Fix & Auto-numbering visibility */
+        .editor-content ul { 
+            list-style-type: disc; 
+            list-style-position: outside;
+            padding-left: 2em; 
+            margin: 1rem 0;
+        }
+        .editor-content ol { 
+            list-style-type: decimal; 
+            list-style-position: outside;
+            padding-left: 2em; 
+            margin: 1rem 0;
+        }
+        
+        /* Minimalist Scene Break */
+        .editor-content hr {
+            border: none;
+            border-top: 1px solid #e0e0e0;
+            margin: 40px 0;
+            height: 1px;
+        }
+        html.dark .editor-content hr {
+            border-color: #292524;
+        }
+
+        .editor-content b, .editor-content strong { font-weight: 700; }
+        .editor-content i, .editor-content em { font-style: italic; }
+
+        /* Toolbar Active State - High Contrast */
+        .toolbar-btn.active {
+            background-color: #333333 !important;
+            color: #ffffff !important;
+        }
+        html.dark .toolbar-btn.active {
+            background-color: #e7e5e4 !important;
+            color: #0c0a09 !important;
+        }
+
+        /* Animation */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e7e5e4; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d6d3d1; }
+        
+        html.dark ::-webkit-scrollbar-thumb { background: #292524; }
+        html.dark ::-webkit-scrollbar-thumb:hover { background: #44403c; }
+
+        /* Drag and Drop Styles */
+        .chapter-item {
+            cursor: grab;
+        }
+        .chapter-item:active {
+            cursor: grabbing;
+        }
+        .chapter-item.dragging {
+            opacity: 0.5;
+            background-color: #e7e5e4;
+            border: 1px dashed #78716c;
+        }
+        html.dark .chapter-item.dragging {
+            background-color: #292524;
+            border: 1px dashed #a8a29e;
+        }
+        .chapter-item.drag-over-top {
+            border-top: 2px solid #78716c;
+        }
+        html.dark .chapter-item.drag-over-top {
+            border-top: 2px solid #a8a29e;
+        }
+        .chapter-item.drag-over-bottom {
+            border-bottom: 2px solid #78716c;
+        }
+        html.dark .chapter-item.drag-over-bottom {
+            border-bottom: 2px solid #a8a29e;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/"
+  }
+}
+</script>
+</head>
+<body class="antialiased selection:bg-stone-200 dark:selection:bg-stone-800 selection:text-stone-900 dark:selection:text-stone-100">
+
+    <!-- VIEW A: THE PORTAL -->
+    <div id="view-portal" class="min-h-screen flex flex-col items-center justify-center p-6 text-center dark:bg-stone-950 transition-colors">
+        <h1 class="font-display text-6xl md:text-8xl font-bold text-stone-900 dark:text-stone-100 mb-4 tracking-tight">LeDelulu</h1>
+        <p class="font-serif text-stone-500 dark:text-stone-400 italic mb-12 text-lg">Where your delusions become literature.</p>
+        
+        <div class="flex flex-col md:flex-row gap-6 w-full max-w-md">
+            <button onclick="app.startNew()" class="flex-1 bg-stone-900 dark:bg-stone-100 text-stone-50 dark:text-stone-900 py-4 px-6 rounded-lg font-sans font-medium hover:bg-stone-800 dark:hover:bg-stone-200 transition-transform active:scale-95 shadow-lg">
+                Start New Delusion
+            </button>
+            
+            <button onclick="document.getElementById('file-upload').click()" class="flex-1 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-800 dark:text-stone-200 py-4 px-6 rounded-lg font-sans font-medium hover:bg-stone-50 dark:hover:bg-stone-800 transition-transform active:scale-95 shadow-sm">
+                Resume Delusion
+            </button>
+            <input type="file" id="file-upload" accept=".json" class="hidden" onchange="app.loadFromFile(this)">
+        </div>
+        
+        <!-- Continue Draft Button (Hidden by default) -->
+        <div id="continue-draft-container" class="mt-6 hidden">
+             <button onclick="app.continueDraft()" class="text-stone-500 dark:text-stone-400 underline hover:text-stone-800 dark:hover:text-stone-200 text-sm font-sans">
+                Continue saved draft
+             </button>
+        </div>
+        
+        <div class="mt-16 flex flex-col items-center gap-4">
+             <button onclick="app.toggleTheme()" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors" title="Toggle Theme">
+                <svg id="theme-icon-portal" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+             </button>
+             <p class="text-xs text-stone-300 dark:text-stone-600 font-sans">v1.5 • Offline Studio</p>
+        </div>
+    </div>
+
+    <!-- VIEW B: THE STUDIO -->
+    <div id="view-studio" class="hidden min-h-screen flex flex-col md:flex-row bg-white dark:bg-stone-950 transition-colors">
+        
+        <!-- Sidebar -->
+        <aside class="w-full md:w-72 bg-stone-50 dark:bg-stone-900 border-r border-stone-100 dark:border-stone-800 flex flex-col h-[100dvh] sticky top-0 z-20 transition-colors">
+            <div class="p-6 border-b border-stone-100 dark:border-stone-800 relative">
+                <!-- Editable Title -->
+                <input 
+                    type="text" 
+                    id="project-title-input" 
+                    class="w-full bg-transparent font-display text-2xl font-bold text-stone-900 dark:text-stone-100 placeholder-stone-300 dark:placeholder-stone-700 outline-none mb-1 focus:placeholder-transparent" 
+                    placeholder="Story Title"
+                    autocomplete="off"
+                >
+                <!-- Editable Author -->
+                <div class="flex items-center">
+                    <span class="font-sans text-xs text-stone-400 uppercase tracking-widest mr-2 shrink-0 select-none">By</span>
+                    <input 
+                        type="text" 
+                        id="project-author-input" 
+                        class="w-full bg-transparent font-sans text-xs text-stone-500 dark:text-stone-400 uppercase tracking-widest placeholder-stone-300 dark:placeholder-stone-700 outline-none focus:text-stone-900 dark:focus:text-stone-200" 
+                        placeholder="Author Name"
+                        autocomplete="off"
+                    >
+                </div>
+            </div>
+            
+            <!-- Data Safety Note -->
+            <div class="px-6 pt-4 pb-0">
+                <div class="bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded p-2 text-center">
+                    <p class="text-[10px] text-stone-400 dark:text-stone-500 italic leading-tight">
+                        Save project (.json) often to backup
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-2" id="chapter-list">
+                <!-- Chapter items injected here -->
+            </div>
+            
+            <div class="p-4 border-t border-stone-100 dark:border-stone-800 space-y-2 bg-stone-50 dark:bg-stone-900">
+                <button onclick="app.addChapter()" class="w-full py-2 text-sm font-sans font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded border border-dashed border-stone-300 dark:border-stone-700 transition-colors">
+                    + Add Chapter
+                </button>
+                <div class="grid grid-cols-2 gap-2 pt-2">
+                    <button id="btn-save-project" onclick="app.openExportModal()" class="py-2 text-xs font-sans text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 truncate">
+                        Save Project
+                    </button>
+                    <button onclick="app.openExportModal()" class="py-2 text-xs font-sans text-stone-900 dark:text-stone-900 bg-stone-200 dark:bg-stone-100 hover:bg-stone-300 dark:hover:bg-stone-300 rounded font-medium">
+                        Publish HTML
+                    </button>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="app.triggerImport()" class="py-2 text-xs font-sans text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded border border-transparent hover:border-stone-200 dark:hover:border-stone-700" title="Import JSON">
+                        📥 Import
+                    </button>
+                    <button onclick="app.openNewWindow()" class="py-2 text-xs font-sans text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded border border-transparent hover:border-stone-200 dark:hover:border-stone-700" title="Open New Window">
+                        ❐ New Window
+                    </button>
+                </div>
+                
+                <div class="pt-2">
+                     <button onclick="app.toggleTheme()" class="w-full py-2 text-xs font-sans text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Switch Light/Dark Mode">
+                        <span id="theme-btn-text">Light Mode</span>
+                     </button>
+                </div>
+                <input type="file" id="import-upload" accept=".json" class="hidden" onchange="app.importChapters(this)">
+            </div>
+        </aside>
+
+        <!-- Main Editor -->
+        <main class="flex-1 h-screen overflow-y-auto relative bg-paper dark:bg-stone-950 cursor-text transition-colors" id="editor-container">
+            
+            <!-- Sticky Toolbar -->
+            <div class="sticky top-0 z-10 bg-paper/95 dark:bg-stone-950/95 backdrop-blur border-b border-stone-100 dark:border-stone-800 px-8 py-3 flex items-center gap-2 select-none flex-wrap transition-colors">
+                <button onclick="document.execCommand('undo')" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Undo">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                </button>
+                <button onclick="document.execCommand('redo')" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors mr-2" title="Redo">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" /></svg>
+                </button>
+                
+                <div class="w-px h-5 bg-stone-200 dark:bg-stone-800 mx-1"></div>
+
+                <!-- Rich Text Buttons -->
+                <button id="btn-bold" onmousedown="event.preventDefault(); document.execCommand('bold'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif font-bold transition-colors" title="Bold">B</button>
+                <button id="btn-italic" onmousedown="event.preventDefault(); document.execCommand('italic'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif italic transition-colors" title="Italic">I</button>
+                <button id="btn-underline" onmousedown="event.preventDefault(); document.execCommand('underline'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif underline transition-colors" title="Underline">U</button>
+                
+                <div class="w-px h-5 bg-stone-200 dark:bg-stone-800 mx-1"></div>
+                
+                <!-- Lists and HR -->
+                <button id="btn-insertUnorderedList" onmousedown="event.preventDefault(); document.execCommand('insertUnorderedList'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif transition-colors text-lg leading-none" title="Bullet List">•</button>
+                <button id="btn-insertOrderedList" onmousedown="event.preventDefault(); document.execCommand('insertOrderedList'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif transition-colors text-sm" title="Numbered List">1.</button>
+                <button onmousedown="event.preventDefault(); document.execCommand('insertHorizontalRule')" class="p-2 w-8 h-8 flex items-center justify-center text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" title="Scene Break">
+                     <span class="block w-4 h-px bg-current"></span>
+                </button>
+            </div>
+
+            <!-- Writing Area -->
+            <div class="max-w-3xl mx-auto px-8 pb-32 pt-12">
+                <!-- Auto-expanding Title -->
+                <textarea 
+                    id="chapter-title-input" 
+                    rows="1" 
+                    placeholder="Chapter Title"
+                    class="w-full text-4xl md:text-5xl font-display font-bold text-stone-900 dark:text-stone-100 placeholder-stone-300 dark:placeholder-stone-700 bg-transparent border-none outline-none resize-none overflow-hidden leading-tight mb-2 p-0"
+                    style="min-height: 60px;"
+                ></textarea>
+                
+                <!-- Chapter Date Input -->
+                <input 
+                    type="text" 
+                    id="chapter-date-input" 
+                    placeholder="Chapter Date (e.g. Oct 27, 2024)" 
+                    class="w-full bg-transparent font-sans text-sm text-stone-500 dark:text-stone-400 placeholder-stone-300 dark:placeholder-stone-700 outline-none mb-8 focus:text-stone-900 dark:focus:text-stone-200 transition-colors"
+                >
+
+                <!-- Body Content -->
+                <div 
+                    id="chapter-body-input" 
+                    contenteditable="true" 
+                    data-placeholder="Start writing your delusion..."
+                    class="editor-content font-serif text-lg leading-loose text-ink dark:text-stone-300 caret-stone-900 dark:caret-stone-100"
+                ></div>
+                
+                <div class="h-[20vh]" id="bottom-spacer"></div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- EXPORT MODAL -->
+    <div id="export-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-stone-900 rounded-lg shadow-xl w-full max-w-md flex flex-col max-h-[80vh] border border-stone-200 dark:border-stone-800">
+            <div class="p-4 border-b border-stone-100 dark:border-stone-800 flex justify-between items-center">
+                <h3 class="font-sans font-bold text-stone-900 dark:text-stone-100">Select Chapters to Export</h3>
+                <button onclick="app.closeExportModal()" class="text-stone-400 hover:text-stone-900 dark:hover:text-stone-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <div class="p-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-950">
+                 <div class="flex items-center gap-2">
+                    <input type="checkbox" id="export-select-all" class="w-4 h-4 accent-stone-900 dark:accent-stone-100 cursor-pointer">
+                    <label for="export-select-all" class="text-xs font-sans font-medium uppercase text-stone-500 dark:text-stone-400 cursor-pointer select-none">Select All / None</label>
+                 </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-2" id="export-chapter-list">
+                <!-- Checklist items injected here -->
+            </div>
+
+            <div class="p-4 border-t border-stone-100 dark:border-stone-800 grid grid-cols-2 gap-3 bg-white dark:bg-stone-900 rounded-b-lg">
+                <button onclick="app.performExport('json')" class="py-2 px-4 rounded-md border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 font-sans text-sm hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+                    Export JSON
+                </button>
+                <button onclick="app.performExport('html')" class="py-2 px-4 rounded-md bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-sans text-sm hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors shadow-sm">
+                    Publish HTML
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const app = {
+            data: {
+                title: "Untitled Story",
+                author: "Unknown Author",
+                chapters: []
+            },
+            currentChapterIndex: 0,
+            hasUnsavedChanges: false,
+            // Drag and Drop State
+            dragSrcIndex: null,
+            dropPosition: null, // 'before' or 'after'
+            
+            init() {
+                // Initialize Theme
+                if (localStorage.getItem('ledelulu_theme') === 'dark' || (!('ledelulu_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                    this.updateThemeIcons(true);
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    this.updateThemeIcons(false);
+                }
+
+                // Check for local save
+                if (localStorage.getItem('ledelulu_draft')) {
+                    document.getElementById('continue-draft-container').classList.remove('hidden');
+                }
+
+                // 1. Auto-resize Title
+                const titleInput = document.getElementById('chapter-title-input');
+                titleInput.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                    app.saveCurrentChapter();
+                });
+
+                // 2. Date Input
+                const dateInput = document.getElementById('chapter-date-input');
+                dateInput.addEventListener('input', () => {
+                    app.saveCurrentChapter();
+                });
+                
+                // 3. Editor Changes
+                const bodyInput = document.getElementById('chapter-body-input');
+                bodyInput.addEventListener('input', () => {
+                    app.saveCurrentChapter();
+                });
+                
+                // 4. Toolbar Update Triggers
+                // We update toolbar on click, keyup (cursor move), and selection change
+                bodyInput.addEventListener('mouseup', () => app.updateToolbar());
+                bodyInput.addEventListener('keyup', () => app.updateToolbar());
+                document.addEventListener('selectionchange', () => app.updateToolbar());
+
+                // 5. Click to Focus Editor
+                document.getElementById('editor-container').addEventListener('click', (e) => {
+                    if (e.target.id === 'editor-container' || e.target.id === 'bottom-spacer') {
+                        const editor = document.getElementById('chapter-body-input');
+                        editor.focus();
+                        // Move cursor to end
+                        const range = document.createRange();
+                        range.selectNodeContents(editor);
+                        range.collapse(false);
+                        const sel = window.getSelection();
+                        sel?.removeAllRanges();
+                        sel?.addRange(range);
+                    }
+                });
+                
+                // 6. Browser Close Protection
+                window.addEventListener('beforeunload', (e) => {
+                    if (app.hasUnsavedChanges) {
+                        e.preventDefault();
+                        e.returnValue = ''; // Chrome requires returnValue to be set
+                    }
+                });
+
+                // 7. Project Meta Inputs (Sidebar Direct Edit)
+                const projTitle = document.getElementById('project-title-input');
+                const projAuthor = document.getElementById('project-author-input');
+                
+                projTitle.addEventListener('input', (e) => {
+                    app.data.title = e.target.value;
+                    app.hasUnsavedChanges = true;
+                    app.updateSaveUI();
+                    app.saveToLocal();
+                });
+                
+                projAuthor.addEventListener('input', (e) => {
+                    app.data.author = e.target.value;
+                    app.hasUnsavedChanges = true;
+                    app.updateSaveUI();
+                    app.saveToLocal();
+                });
+            },
+            
+            toggleTheme() {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('ledelulu_theme', 'light');
+                    this.updateThemeIcons(false);
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('ledelulu_theme', 'dark');
+                    this.updateThemeIcons(true);
+                }
+            },
+            
+            updateThemeIcons(isDark) {
+                const icon = document.getElementById('theme-icon-portal');
+                const btnText = document.getElementById('theme-btn-text');
+                
+                if (isDark) {
+                     // Sun icon for "Switch to Light"
+                    if(icon) icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />';
+                    if(btnText) btnText.textContent = "Light Mode";
+                } else {
+                    // Moon icon for "Switch to Dark"
+                    if(icon) icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
+                    if(btnText) btnText.textContent = "Dark Mode";
+                }
+            },
+            
+            updateToolbar() {
+                const commands = ['bold', 'italic', 'underline', 'insertUnorderedList', 'insertOrderedList'];
+                
+                commands.forEach(cmd => {
+                    const isActive = document.queryCommandState(cmd);
+                    const btn = document.getElementById('btn-' + cmd);
+                    if (btn) {
+                        if (isActive) {
+                            btn.classList.add('active');
+                            btn.classList.remove('text-stone-600', 'dark:text-stone-400', 'hover:bg-stone-100', 'dark:hover:bg-stone-800');
+                        } else {
+                            btn.classList.remove('active');
+                            btn.classList.add('text-stone-600', 'dark:text-stone-400', 'hover:bg-stone-100', 'dark:hover:bg-stone-800');
+                        }
+                    }
+                });
+            },
+
+            checkUnsaved() {
+                if (this.hasUnsavedChanges) {
+                    return confirm("You have unsaved changes that haven't been exported to a file yet. Are you sure you want to proceed?");
+                }
+                return true;
+            },
+
+            startNew() {
+                if (!this.checkUnsaved()) return;
+                
+                this.data = {
+                    title: "Untitled Story",
+                    author: "Unknown Author",
+                    chapters: [
+                        { title: "", content: "", date: new Date().toLocaleDateString(), id: Date.now() }
+                    ]
+                };
+                this.currentChapterIndex = 0;
+                this.hasUnsavedChanges = false;
+                this.switchView('studio');
+                this.renderSidebar();
+                this.loadChapterToEditor();
+                this.updateSaveUI();
+                this.saveToLocal();
+            },
+            
+            continueDraft() {
+                if (!this.checkUnsaved()) return;
+                this.loadFromLocal();
+                this.switchView('studio');
+                this.renderSidebar();
+                this.loadChapterToEditor();
+            },
+
+            loadFromFile(input) {
+                if (!this.checkUnsaved()) {
+                    input.value = ''; // Reset input
+                    return;
+                }
+                
+                const file = input.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const json = JSON.parse(e.target.result);
+                        this.data = json;
+                        this.currentChapterIndex = 0;
+                        this.hasUnsavedChanges = false;
+                        this.switchView('studio');
+                        this.renderSidebar();
+                        this.loadChapterToEditor();
+                        this.updateSaveUI();
+                        this.saveToLocal();
+                    } catch (err) {
+                        alert("Invalid file format.");
+                    }
+                };
+                reader.readAsText(file);
+            },
+
+            exitToPortal() {
+                if (!this.checkUnsaved()) return;
+                this.switchView('portal');
+                // We re-check for draft to show the button if they exited
+                if (localStorage.getItem('ledelulu_draft')) {
+                    document.getElementById('continue-draft-container').classList.remove('hidden');
+                }
+            },
+
+            switchView(viewName) {
+                document.getElementById('view-portal').classList.add('hidden');
+                document.getElementById('view-studio').classList.add('hidden');
+                document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            },
+
+            // --- DRAG AND DROP HANDLERS ---
+            handleDragStart(e) {
+                const btn = e.target.closest('button');
+                if (!btn) return;
+                
+                app.dragSrcIndex = Number(btn.dataset.index);
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', app.dragSrcIndex);
+                
+                // Slight delay to add class so the drag image is standard, but the element fades
+                setTimeout(() => btn.classList.add('dragging'), 0);
+            },
+
+            handleDragOver(e) {
+                if (e.preventDefault) e.preventDefault();
+                const btn = e.target.closest('button');
+                if (!btn || btn.dataset.index == app.dragSrcIndex) return false;
+                
+                const rect = btn.getBoundingClientRect();
+                const relY = e.clientY - rect.top;
+                
+                // Determine insertion point: Top half -> Before, Bottom half -> After
+                if (relY > rect.height / 2) {
+                    btn.classList.add('drag-over-bottom');
+                    btn.classList.remove('drag-over-top');
+                    app.dropPosition = 'after';
+                } else {
+                    btn.classList.add('drag-over-top');
+                    btn.classList.remove('drag-over-bottom');
+                    app.dropPosition = 'before';
+                }
+                
+                return false;
+            },
+
+            handleDragEnter(e) {
+                // handled by dragOver styling
+            },
+
+            handleDragLeave(e) {
+                const btn = e.target.closest('button');
+                if (btn) {
+                    btn.classList.remove('drag-over-top', 'drag-over-bottom');
+                }
+            },
+            
+            handleDragEnd(e) {
+                 const btns = document.querySelectorAll('.chapter-item');
+                 btns.forEach(b => b.classList.remove('dragging', 'drag-over-top', 'drag-over-bottom'));
+            },
+
+            handleDrop(e) {
+                e.stopPropagation();
+                const btn = e.target.closest('button');
+                if (app.dragSrcIndex !== null && btn) {
+                    const fromIndex = app.dragSrcIndex;
+                    let toIndex = Number(btn.dataset.index);
+                    
+                    if (fromIndex !== toIndex) {
+                        const chapters = app.data.chapters;
+                        // Keep track of active chapter ID to maintain selection
+                        const activeChapterId = chapters[app.currentChapterIndex]?.id;
+                        
+                        // Calculate final insertion index
+                        // Remove item first
+                        const [item] = chapters.splice(fromIndex, 1);
+                        
+                        // If we removed an item before the target, the target index shifts down by 1
+                        if (fromIndex < toIndex) {
+                            toIndex--;
+                        }
+                        
+                        // If drop position is 'after', we increment target index to insert after it
+                        if (app.dropPosition === 'after') {
+                            toIndex++;
+                        }
+                        
+                        // Insert item
+                        chapters.splice(toIndex, 0, item);
+                        
+                        // Restore Active Selection
+                        if (activeChapterId) {
+                            const newIndex = chapters.findIndex(c => c.id === activeChapterId);
+                            if (newIndex !== -1) app.currentChapterIndex = newIndex;
+                        } else {
+                            // If active chapter was somehow lost (shouldn't happen), select the moved one
+                            app.currentChapterIndex = toIndex;
+                        }
+                        
+                        app.hasUnsavedChanges = true;
+                        app.updateSaveUI();
+                        app.renderSidebar();
+                        app.saveToLocal();
+                    }
+                }
+                return false;
+            },
+
+            renderSidebar() {
+                // Update editable inputs with current data
+                document.getElementById('project-title-input').value = this.data.title;
+                document.getElementById('project-author-input').value = this.data.author;
+                
+                const list = document.getElementById('chapter-list');
+                list.innerHTML = '';
+                
+                this.data.chapters.forEach((chapter, index) => {
+                    const btn = document.createElement('button');
+                    const isActive = index === this.currentChapterIndex;
+                    
+                    // Add Drag Properties
+                    btn.setAttribute('draggable', 'true');
+                    btn.dataset.index = index;
+                    
+                    // Listeners
+                    btn.addEventListener('dragstart', app.handleDragStart);
+                    btn.addEventListener('dragover', app.handleDragOver);
+                    btn.addEventListener('dragleave', app.handleDragLeave);
+                    btn.addEventListener('drop', app.handleDrop);
+                    btn.addEventListener('dragend', app.handleDragEnd);
+                    
+                    btn.className = `chapter-item w-full text-left px-3 py-2 rounded-md text-sm font-sans transition-all mb-1 select-none border border-transparent ${
+                        isActive 
+                        ? 'bg-stone-200 dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-semibold' 
+                        : 'text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
+                    }`;
+                    // REMOVED AUTO NUMBERING
+                    btn.textContent = chapter.title || 'Untitled Chapter';
+                    btn.onclick = () => app.selectChapter(index);
+                    list.appendChild(btn);
+                });
+            },
+
+            selectChapter(index) {
+                // We don't need checkUnsaved here because switching chapters keeps us in the same "Project"
+                // which is covered by saveToLocal()
+                this.currentChapterIndex = index;
+                this.renderSidebar(); 
+                this.loadChapterToEditor();
+            },
+
+            addChapter() {
+                this.data.chapters.push({
+                    title: "",
+                    content: "",
+                    date: new Date().toLocaleDateString(),
+                    id: Date.now()
+                });
+                this.currentChapterIndex = this.data.chapters.length - 1;
+                this.hasUnsavedChanges = true;
+                this.updateSaveUI();
+                this.renderSidebar();
+                this.loadChapterToEditor();
+                this.saveToLocal();
+            },
+
+            loadChapterToEditor() {
+                const chapter = this.data.chapters[this.currentChapterIndex];
+                const titleInput = document.getElementById('chapter-title-input');
+                const dateInput = document.getElementById('chapter-date-input');
+                const bodyInput = document.getElementById('chapter-body-input');
+                
+                titleInput.value = chapter.title || "";
+                dateInput.value = chapter.date || "";
+                bodyInput.innerHTML = chapter.content || "";
+                
+                // Trigger resize
+                titleInput.style.height = 'auto';
+                titleInput.style.height = titleInput.scrollHeight + 'px';
+            },
+
+            saveCurrentChapter() {
+                const title = document.getElementById('chapter-title-input').value;
+                const date = document.getElementById('chapter-date-input').value;
+                const content = document.getElementById('chapter-body-input').innerHTML;
+                
+                if (this.data.chapters[this.currentChapterIndex]) {
+                    // Check if actually changed to avoid triggering dirty state on mere clicks
+                    const currentChap = this.data.chapters[this.currentChapterIndex];
+                    if (currentChap.title !== title || currentChap.content !== content || currentChap.date !== date) {
+                         currentChap.title = title;
+                         currentChap.content = content;
+                         currentChap.date = date;
+                         
+                         this.hasUnsavedChanges = true;
+                         this.updateSaveUI();
+                         this.renderSidebar();
+                         this.saveToLocal();
+                    }
+                }
+            },
+            
+            saveToLocal() {
+                localStorage.setItem('ledelulu_draft', JSON.stringify(this.data));
+            },
+            
+            loadFromLocal() {
+                const saved = localStorage.getItem('ledelulu_draft');
+                if (saved) {
+                    this.data = JSON.parse(saved);
+                }
+            },
+            
+            updateSaveUI() {
+                const btn = document.getElementById('btn-save-project');
+                if (this.hasUnsavedChanges) {
+                    btn.textContent = "Save Project *";
+                    btn.classList.add('border-stone-400', 'dark:border-stone-500', 'text-stone-800', 'dark:text-stone-100');
+                    btn.classList.remove('border-stone-200', 'dark:border-stone-700', 'text-stone-500', 'dark:text-stone-400');
+                } else {
+                    btn.textContent = "Save Project";
+                    btn.classList.remove('border-stone-400', 'dark:border-stone-500', 'text-stone-800', 'dark:text-stone-100');
+                    btn.classList.add('border-stone-200', 'dark:border-stone-700', 'text-stone-500', 'dark:text-stone-400');
+                }
+            },
+
+            // --- EXPORT MANAGER ---
+
+            openExportModal() {
+                const modal = document.getElementById('export-modal');
+                const list = document.getElementById('export-chapter-list');
+                list.innerHTML = '';
+                
+                // Handle Select All
+                const selectAll = document.getElementById('export-select-all');
+                selectAll.checked = true;
+                selectAll.onclick = (e) => {
+                    const checkboxes = list.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach(cb => cb.checked = e.target.checked);
+                };
+
+                // Generate List
+                this.data.chapters.forEach((chapter, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center gap-3 p-2 hover:bg-stone-50 dark:hover:bg-stone-800 rounded transition-colors';
+                    div.innerHTML = `
+                        <input type="checkbox" class="export-checkbox w-4 h-4 accent-stone-900 dark:accent-stone-100 cursor-pointer" id="export-ch-${index}" checked value="${index}">
+                        <label for="export-ch-${index}" class="text-sm font-sans truncate cursor-pointer select-none flex-1 text-stone-700 dark:text-stone-300">${index + 1}. ${chapter.title || 'Untitled'}</label>
+                    `;
+                    list.appendChild(div);
+                });
+                
+                modal.classList.remove('hidden');
+            },
+
+            closeExportModal() {
+                document.getElementById('export-modal').classList.add('hidden');
+            },
+
+            performExport(type) {
+                const checkboxes = document.querySelectorAll('.export-checkbox:checked');
+                if (checkboxes.length === 0) {
+                    alert("Please select at least one chapter.");
+                    return;
+                }
+                
+                const selectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.value));
+                // Ensure order
+                selectedIndices.sort((a,b) => a - b);
+                
+                const selectedChapters = selectedIndices.map(i => this.data.chapters[i]);
+                
+                const exportData = {
+                    title: this.data.title,
+                    author: this.data.author,
+                    chapters: selectedChapters
+                };
+                
+                if (type === 'json') {
+                    this.exportJSON(exportData);
+                } else {
+                    this.publishHTML(exportData);
+                }
+                
+                this.closeExportModal();
+            },
+
+            exportJSON(data = this.data) {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                const safeTitle = data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                downloadAnchorNode.setAttribute("download", safeTitle + ".json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                
+                // Only reset dirty flag if we exported the whole thing (default)
+                if (data === this.data) {
+                    this.hasUnsavedChanges = false;
+                    this.updateSaveUI();
+                }
+            },
+
+            publishHTML(data = this.data) {
+                const safeTitle = data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                const contentHtml = data.chapters.map((c, index) => {
+                    const isOpen = index === data.chapters.length - 1 ? 'open' : '';
+                    const dateDisplay = c.date ? c.date : '';
+                    return `
+                    <details class="chapter" id="chapter-${index}" ${isOpen}>
+                        <summary>
+                            <div class="header-group">
+                                <h2>${c.title}</h2>
+                                <span class="meta">${dateDisplay}</span>
+                            </div>
+                        </summary>
+                        <div class="content fade-in">${c.content}</div>
+                    </details>`;
+                }).join('');
+
+                const htmlTemplate = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${data.title} - ${data.author}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fdfdfd;
+            --text-color: #333333;
+            --heading-color: #1c1917;
+            --meta-color: #78716c;
+            --border-color: #eee;
+            --divider-color: #d6d3d1;
+            --blockquote-border: #e7e5e4;
+            --blockquote-color: #57534e;
+            --hover-bg: #f5f5f4;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0c0a09;
+                --text-color: #d6d3d1;
+                --heading-color: #f5f5f4;
+                --meta-color: #a8a29e;
+                --border-color: #292524;
+                --divider-color: #44403c;
+                --blockquote-border: #44403c;
+                --blockquote-color: #a8a29e;
+                --hover-bg: #1c1917;
+            }
+        }
+
+        body { background: var(--bg-color); color: var(--text-color); font-family: 'Merriweather', serif; line-height: 1.8; margin: 0; padding: 40px 20px; transition: background 0.3s, color 0.3s; }
+        .container { max-width: 700px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 60px; }
+        h1 { font-family: 'Playfair Display', serif; font-size: 3em; margin-bottom: 10px; color: var(--heading-color); }
+        .author { font-style: italic; color: var(--meta-color); }
+        
+        /* Accordion Styles */
+        .controls { text-align: right; margin-bottom: 20px; font-family: sans-serif; }
+        button#sort-btn { background: none; border: 1px solid var(--border-color); color: var(--meta-color); padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.8em; }
+        button#sort-btn:hover { color: var(--text-color); border-color: var(--meta-color); }
+
+        details { border-bottom: 1px solid var(--border-color); margin-bottom: 0; }
+        details:last-child { border-bottom: none; }
+        
+        summary { list-style: none; cursor: pointer; padding: 25px 0; display: flex; justify-content: space-between; align-items: center; transition: color 0.2s; }
+        summary:hover { background-color: var(--hover-bg); padding-left: 10px; padding-right: 10px; margin: 0 -10px; border-radius: 4px; }
+        summary::-webkit-details-marker { display: none; }
+        
+        summary h2 { font-family: 'Playfair Display', serif; font-size: 1.4em; margin: 0; color: var(--heading-color); display: inline-block; }
+        .header-group { display: flex; flex-direction: column; }
+        .meta { font-family: sans-serif; font-size: 0.75em; color: var(--meta-color); margin-top: 5px; }
+        
+        summary::after { content: '+'; font-size: 1.5em; font-weight: 300; margin-left: 15px; color: var(--meta-color); }
+        details[open] summary::after { content: '-'; }
+        
+        .content { padding: 20px 0 60px 0; animation: fadeIn 0.5s ease; border-top: 1px dashed var(--border-color); margin-top: 10px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content p { margin-bottom: 1.5em; }
+        blockquote { border-left: 4px solid var(--blockquote-border); padding-left: 20px; color: var(--blockquote-color); font-style: italic; margin: 1.5em 0; }
+        ul { list-style-type: disc; padding-left: 20px; margin: 1em 0; }
+        ol { list-style-type: decimal; padding-left: 20px; margin: 1em 0; }
+        hr { border: none; border-top: 1px solid var(--border-color); margin: 40px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>${data.title}</h1>
+            <p class="author">by ${data.author}</p>
+        </header>
+        
+        <div class="controls">
+            <button id="sort-btn">Sort: Oldest First ⬇</button>
+        </div>
+
+        <main id="chapter-container">
+            ${contentHtml}
+        </main>
+        
+        <footer style="text-align: center; margin-top: 100px; font-size: 0.8em; color: var(--meta-color); font-family: sans-serif;">
+            Generated by LeDelulu
+        </footer>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('sort-btn');
+            const container = document.getElementById('chapter-container');
+            let isOldestFirst = true;
+
+            btn.addEventListener('click', () => {
+                const chapters = Array.from(container.children);
+                container.innerHTML = '';
+                chapters.reverse().forEach(c => container.appendChild(c));
+                isOldestFirst = !isOldestFirst;
+                btn.textContent = isOldestFirst ? "Sort: Oldest First ⬇" : "Sort: Newest First ⬆";
+            });
+        });
+    <\/script>
+</body>
+</html>`;
+                
+                const blob = new Blob([htmlTemplate], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `LeDelulu_${safeTitle}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            },
+
+            // --- IMPORT & NEW WINDOW ---
+
+            triggerImport() {
+                document.getElementById('import-upload').click();
+            },
+
+            importChapters(input) {
+                const file = input.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const json = JSON.parse(e.target.result);
+                        let newChapters = [];
+                        
+                        // Handle LeDelulu format (Story Object)
+                        if (json.chapters && Array.isArray(json.chapters)) {
+                            newChapters = json.chapters;
+                        } 
+                        // Handle simple array of chapters
+                        else if (Array.isArray(json)) {
+                            newChapters = json;
+                        } 
+                        // Handle single chapter object
+                        else if (json.content && (json.title !== undefined)) {
+                            newChapters = [json];
+                        } else {
+                            throw new Error("Unknown format");
+                        }
+                        
+                        // Assign new unique IDs to avoid collision
+                        newChapters.forEach(c => c.id = Date.now() + Math.random());
+                        
+                        // Merge
+                        this.data.chapters = [...this.data.chapters, ...newChapters];
+                        this.hasUnsavedChanges = true;
+                        
+                        this.renderSidebar();
+                        this.updateSaveUI();
+                        this.saveToLocal();
+                        alert(`Successfully imported ${newChapters.length} chapter(s).`);
+                    } catch (err) {
+                        alert("Failed to import: Invalid file format.");
+                        console.error(err);
+                    }
+                    input.value = ''; // Reset input to allow re-importing same file
+                };
+                reader.readAsText(file);
+            },
+
+            openNewWindow() {
+                window.open(window.location.href, '_blank');
+            }
+        };
+
+        // Initialize
+        app.init();
+        window.app = app; // Explicitly attach to window
+    </script>
+</body>
+</html>

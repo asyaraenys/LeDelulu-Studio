@@ -1,0 +1,1 @@
+// This file is no longer used. The app is now a single-file index.html.
