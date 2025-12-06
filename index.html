@@ -197,8 +197,8 @@
 {
   "imports": {
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/"
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1"
   }
 }
 </script>
@@ -232,7 +232,7 @@
              <button onclick="app.toggleTheme()" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors" title="Toggle Theme">
                 <svg id="theme-icon-portal" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
              </button>
-             <p class="text-xs text-stone-300 dark:text-stone-600 font-sans">v1.7 • Offline Studio • Built by Asyaraenys</p>
+             <p class="text-xs text-stone-300 dark:text-stone-600 font-sans">v1.8 • Offline Studio • Built by Asyaraenys</p>
         </div>
     </div>
 
@@ -579,7 +579,7 @@
                 const icon = document.getElementById('theme-icon-portal');
                 const sidebarIcon = document.getElementById('theme-icon-sidebar');
                 const sunPath = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />';
-                const moonPath = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
+                const moonPath = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>';
                 
                 if (isDark) {
                      // Sun icon for "Switch to Light"
@@ -1015,17 +1015,24 @@
 
             publishHTML(data = this.data, themeMode = 'system') {
                 const contentHtml = data.chapters.map((c, index) => {
-                    const isOpen = index === data.chapters.length - 1 ? 'open' : '';
                     const dateDisplay = c.date ? c.date : '';
+                    // Default to CLOSED (no open attribute)
                     return `
-                    <details class="chapter" id="chapter-${index}" ${isOpen}>
+                    <details class="chapter" id="chapter-${index}">
                         <summary>
                             <div class="header-group">
                                 <h2>${c.title}</h2>
                                 <span class="meta">${dateDisplay}</span>
                             </div>
                         </summary>
-                        <div class="content fade-in">${c.content}</div>
+                        <div class="content fade-in">
+                            ${c.content}
+                            <div class="chapter-footer">
+                                <button class="minimize-btn" onclick="this.closest('details').removeAttribute('open'); event.stopPropagation();">
+                                    Close Chapter ▲
+                                </button>
+                            </div>
+                        </div>
                     </details>`;
                 }).join('');
 
@@ -1063,6 +1070,7 @@
             --blockquote-border: #e7e5e4;
             --blockquote-color: #57534e;
             --hover-bg: #f5f5f4;
+            --btn-text: #57534e;
         }
 
         .dark {
@@ -1075,6 +1083,7 @@
             --blockquote-border: #44403c;
             --blockquote-color: #a8a29e;
             --hover-bg: #1c1917;
+            --btn-text: #a8a29e;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -1088,6 +1097,7 @@
                 --blockquote-border: #44403c;
                 --blockquote-color: #a8a29e;
                 --hover-bg: #1c1917;
+                --btn-text: #a8a29e;
             }
         }
 
@@ -1101,6 +1111,10 @@
         .controls { text-align: right; margin-bottom: 20px; font-family: sans-serif; display: flex; justify-content: space-between; align-items: center; }
         button.control-btn { background: none; border: 1px solid var(--border-color); color: var(--meta-color); padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.8em; }
         button.control-btn:hover { color: var(--text-color); border-color: var(--meta-color); }
+        
+        /* Icon Button */
+        .icon-btn { display: flex; items-center: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: none; background: transparent; cursor: pointer; color: var(--meta-color); }
+        .icon-btn:hover { color: var(--text-color); }
 
         details { border-bottom: 1px solid var(--border-color); margin-bottom: 0; }
         details:last-child { border-bottom: none; }
@@ -1116,7 +1130,7 @@
         summary::after { content: '+'; font-size: 1.5em; font-weight: 300; margin-left: 15px; color: var(--meta-color); }
         details[open] summary::after { content: '-'; }
         
-        .content { padding: 20px 0 60px 0; animation: fadeIn 0.5s ease; border-top: 1px dashed var(--border-color); margin-top: 10px; }
+        .content { padding: 20px 0 60px 0; animation: fadeIn 0.5s ease; border-top: 1px dashed var(--border-color); margin-top: 10px; position: relative; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         .content p { margin-bottom: 1.5em; }
@@ -1124,6 +1138,10 @@
         ul { list-style-type: disc; padding-left: 20px; margin: 1em 0; }
         ol { list-style-type: decimal; padding-left: 20px; margin: 1em 0; }
         hr { border: none; border-top: 1px solid var(--border-color); margin: 40px 0; }
+        
+        .chapter-footer { display: flex; justify-content: flex-end; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+        .minimize-btn { background: transparent; border: none; font-family: sans-serif; font-size: 0.8em; color: var(--meta-color); cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+        .minimize-btn:hover { color: var(--text-color); }
     </style>
 </head>
 <body class="${themeMode === 'light' ? 'light' : ''}">
@@ -1134,9 +1152,11 @@
         </header>
         
         <div class="controls">
-            <button id="theme-btn" class="control-btn" title="Toggle Theme">
-                <span id="icon-moon">🌙</span>
-                <span id="icon-sun" style="display:none">☀️</span>
+            <button id="theme-btn" class="icon-btn" title="Toggle Theme">
+                <!-- Moon Icon -->
+                <svg id="icon-moon" style="display:none" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                <!-- Sun Icon -->
+                <svg id="icon-sun" style="display:none" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             </button>
             <button id="sort-btn" class="control-btn">Sort: Oldest First ⬇</button>
         </div>
@@ -1171,11 +1191,12 @@
             const html = document.documentElement;
 
             function updateIcons() {
-                if (html.classList.contains('dark')) {
+                const isDark = html.classList.contains('dark');
+                if (isDark) {
                     iconMoon.style.display = 'none';
-                    iconSun.style.display = 'inline';
+                    iconSun.style.display = 'block';
                 } else {
-                    iconMoon.style.display = 'inline';
+                    iconMoon.style.display = 'block';
                     iconSun.style.display = 'none';
                 }
             }
