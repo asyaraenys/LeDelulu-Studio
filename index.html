@@ -197,8 +197,8 @@
 {
   "imports": {
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1"
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/"
   }
 }
 </script>
@@ -322,36 +322,39 @@
         <main class="flex-1 h-screen overflow-y-auto relative bg-paper dark:bg-stone-950 cursor-text transition-colors w-full" id="editor-container">
             
             <!-- Sticky Toolbar -->
-            <div class="sticky top-0 z-10 bg-paper/95 dark:bg-stone-950/95 backdrop-blur border-b border-stone-100 dark:border-stone-800 px-4 md:px-8 py-3 flex items-center gap-2 select-none flex-wrap transition-colors">
-                <!-- Menu Button (Toggle Sidebar) -->
-                <button onclick="app.toggleSidebar()" class="p-2 mr-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Toggle Sidebar">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                </button>
+            <div class="sticky top-0 z-10 bg-paper/95 dark:bg-stone-950/95 backdrop-blur border-b border-stone-100 dark:border-stone-800 px-4 md:px-8 py-2 md:py-3 flex flex-col md:flex-row md:items-center gap-y-2 gap-x-4 select-none transition-colors">
+                <!-- Row 1 (Mobile): Menu Button -->
+                <div class="flex items-center w-full md:w-auto border-b md:border-b-0 border-stone-100 dark:border-stone-800 pb-2 md:pb-0">
+                    <button onclick="app.toggleSidebar()" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Toggle Sidebar">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                    </button>
+                </div>
 
-                <div class="w-px h-5 bg-stone-200 dark:bg-stone-800 mx-1 hidden md:block"></div>
+                <!-- Row 2 (Mobile): Tools -->
+                <div class="flex items-center gap-1 flex-wrap">
+                    <button onclick="document.execCommand('undo')" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Undo">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                    </button>
+                    <button onclick="document.execCommand('redo')" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors mr-2" title="Redo">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" /></svg>
+                    </button>
+                    
+                    <div class="w-px h-5 bg-stone-200 dark:bg-stone-800 mx-1"></div>
 
-                <button onclick="document.execCommand('undo')" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Undo">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
-                </button>
-                <button onclick="document.execCommand('redo')" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors mr-2" title="Redo">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" /></svg>
-                </button>
-                
-                <div class="w-px h-5 bg-stone-200 dark:bg-stone-800 mx-1"></div>
-
-                <!-- Rich Text Buttons -->
-                <button id="btn-bold" onmousedown="event.preventDefault(); document.execCommand('bold'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif font-bold transition-colors" title="Bold">B</button>
-                <button id="btn-italic" onmousedown="event.preventDefault(); document.execCommand('italic'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif italic transition-colors" title="Italic">I</button>
-                <button id="btn-underline" onmousedown="event.preventDefault(); document.execCommand('underline'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif underline transition-colors" title="Underline">U</button>
-                
-                <div class="w-px h-5 bg-stone-200 dark:bg-stone-800 mx-1"></div>
-                
-                <!-- Lists and HR -->
-                <button id="btn-insertUnorderedList" onmousedown="event.preventDefault(); document.execCommand('insertUnorderedList'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif transition-colors text-lg leading-none" title="Bullet List">•</button>
-                <button id="btn-insertOrderedList" onmousedown="event.preventDefault(); document.execCommand('insertOrderedList'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif transition-colors text-sm" title="Numbered List">1.</button>
-                <button onmousedown="event.preventDefault(); document.execCommand('insertHorizontalRule')" class="p-2 w-8 h-8 flex items-center justify-center text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" title="Scene Break">
-                     <span class="block w-4 h-px bg-current"></span>
-                </button>
+                    <!-- Rich Text Buttons -->
+                    <button id="btn-bold" onmousedown="event.preventDefault(); document.execCommand('bold'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif font-bold transition-colors" title="Bold">B</button>
+                    <button id="btn-italic" onmousedown="event.preventDefault(); document.execCommand('italic'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif italic transition-colors" title="Italic">I</button>
+                    <button id="btn-underline" onmousedown="event.preventDefault(); document.execCommand('underline'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif underline transition-colors" title="Underline">U</button>
+                    
+                    <div class="w-px h-5 bg-stone-200 dark:bg-stone-800 mx-1"></div>
+                    
+                    <!-- Lists and HR -->
+                    <button id="btn-insertUnorderedList" onmousedown="event.preventDefault(); document.execCommand('insertUnorderedList'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif transition-colors text-lg leading-none" title="Bullet List">•</button>
+                    <button id="btn-insertOrderedList" onmousedown="event.preventDefault(); document.execCommand('insertOrderedList'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif transition-colors text-sm" title="Numbered List">1.</button>
+                    <button onmousedown="event.preventDefault(); document.execCommand('insertHorizontalRule')" class="p-2 w-8 h-8 flex items-center justify-center text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" title="Scene Break">
+                        <span class="block w-4 h-px bg-current"></span>
+                    </button>
+                </div>
             </div>
 
             <!-- Writing Area -->
