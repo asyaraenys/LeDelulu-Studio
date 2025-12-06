@@ -197,8 +197,8 @@
 {
   "imports": {
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1"
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/"
   }
 }
 </script>
@@ -232,7 +232,7 @@
              <button onclick="app.toggleTheme()" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors" title="Toggle Theme">
                 <svg id="theme-icon-portal" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
              </button>
-             <p class="text-xs text-stone-300 dark:text-stone-600 font-sans">v1.8 • Offline Studio • Built by Asyaraenys</p>
+             <p class="text-xs text-stone-300 dark:text-stone-600 font-sans">v1.9 • Offline Studio • Built by Asyaraenys</p>
         </div>
     </div>
 
@@ -309,7 +309,7 @@
                     </button>
                 </div>
                 
-                <!-- Row 3: Theme/Exit (Aligned) -->
+                <!-- Row 3: Theme/Exit (Aligned Grid) -->
                 <div class="grid grid-cols-2 gap-2">
                      <button onclick="app.toggleTheme()" class="py-2 text-xs font-sans text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded border border-transparent hover:border-stone-200 dark:hover:border-stone-700 flex items-center justify-center transition-colors" title="Switch Light/Dark Mode">
                         <svg id="theme-icon-sidebar" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"></svg>
@@ -977,8 +977,6 @@
                     chapters: selectedChapters
                 };
                 
-                // REMOVED Theme selection logic, defaulting to system
-
                 if (type === 'json') {
                     this.exportJSON(exportData);
                 } else {
@@ -1016,27 +1014,30 @@
             publishHTML(data = this.data, themeMode = 'system') {
                 const contentHtml = data.chapters.map((c, index) => {
                     const dateDisplay = c.date ? c.date : '';
-                    // Default to CLOSED (no open attribute)
+                    // Checkbox hack for independent toggling (better for mobile webviews)
+                    // No default 'checked' state - All closed by default
                     return `
-                    <details class="chapter" id="chapter-${index}">
-                        <summary>
-                            <div class="header-group">
+                    <div class="chapter-container">
+                        <input type="checkbox" id="ch-${index}" class="chapter-state">
+                        <label for="ch-${index}" class="chapter-header">
+                            <div class="header-content">
                                 <h2>${c.title}</h2>
                                 <span class="meta">${dateDisplay}</span>
                             </div>
-                        </summary>
-                        <div class="content fade-in">
-                            ${c.content}
+                            <span class="indicator"></span>
+                        </label>
+                        <div class="chapter-content">
+                            <div class="inner-body">
+                                ${c.content}
+                            </div>
                             <div class="chapter-footer">
-                                <button class="minimize-btn" onclick="this.closest('details').removeAttribute('open'); event.stopPropagation();">
-                                    Close Chapter ▲
-                                </button>
+                                <!-- Target the specific chapter checkbox to close it -->
+                                <label for="ch-${index}" class="minimize-btn">Close Chapter ▲</label>
                             </div>
                         </div>
-                    </details>`;
+                    </div>`;
                 }).join('');
 
-                // IMPORTANT: All script tags inside this template must use \x3Cscript or <\/script> to prevent breaking the main file parser
                 const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1044,178 +1045,259 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${data.title} - ${data.author}</title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <script>
-        // Injected Theme Mode: ${themeMode}
-        (function() {
-            const mode = '${themeMode}';
-            if (mode === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else if (mode === 'light') {
-                document.documentElement.classList.remove('dark');
-            } else {
-                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.documentElement.classList.add('dark');
-                }
-            }
-        })();
-    <\/script>
     <style>
+        /* CSS Variables - Light Mode Default */
         :root {
-            --bg-color: #fdfdfd;
-            --text-color: #333333;
-            --heading-color: #1c1917;
-            --meta-color: #78716c;
-            --border-color: #eee;
-            --divider-color: #d6d3d1;
-            --blockquote-border: #e7e5e4;
-            --blockquote-color: #57534e;
-            --hover-bg: #f5f5f4;
-            --btn-text: #57534e;
+            --bg: #fdfdfd;
+            --text: #333333;
+            --heading: #1c1917;
+            --meta: #78716c;
+            --border: #e7e5e4;
+            --accent: #d6d3d1;
+            --hover: #f5f5f4;
+            --quote: #57534e;
+            --btn-text: #44403c; /* Darker for visibility */
+            --btn-border: #d6d3d1;
         }
 
-        .dark {
-            --bg-color: #0c0a09;
-            --text-color: #d6d3d1;
-            --heading-color: #f5f5f4;
-            --meta-color: #a8a29e;
-            --border-color: #292524;
-            --divider-color: #44403c;
-            --blockquote-border: #44403c;
-            --blockquote-color: #a8a29e;
-            --hover-bg: #1c1917;
+        /* Base Reset */
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; font-family: 'Merriweather', serif; transition: background 0.3s, color 0.3s; background: var(--bg); color: var(--text); }
+        
+        /* State Inputs - Hidden */
+        .state-input { display: none; }
+
+        /* Theme Logic via Sibling Selector */
+        #theme-toggle:checked ~ .page-wrapper {
+            --bg: #0c0a09;
+            --text: #d6d3d1;
+            --heading: #f5f5f4;
+            --meta: #a8a29e;
+            --border: #292524;
+            --accent: #44403c;
+            --hover: #1c1917;
+            --quote: #a8a29e;
             --btn-text: #a8a29e;
+            --btn-border: #44403c;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root:not(.light) {
-                --bg-color: #0c0a09;
-                --text-color: #d6d3d1;
-                --heading-color: #f5f5f4;
-                --meta-color: #a8a29e;
-                --border-color: #292524;
-                --divider-color: #44403c;
-                --blockquote-border: #44403c;
-                --blockquote-color: #a8a29e;
-                --hover-bg: #1c1917;
-                --btn-text: #a8a29e;
-            }
+        .page-wrapper {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: var(--bg);
+            min-height: 100vh;
         }
 
-        body { background: var(--bg-color); color: var(--text-color); font-family: 'Merriweather', serif; line-height: 1.8; margin: 0; padding: 40px 20px; transition: background 0.3s, color 0.3s; }
-        .container { max-width: 700px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 60px; }
-        h1 { font-family: 'Playfair Display', serif; font-size: 3em; margin-bottom: 10px; color: var(--heading-color); }
-        .author { font-style: italic; color: var(--meta-color); }
-        
-        /* Accordion Styles */
-        .controls { text-align: right; margin-bottom: 20px; font-family: sans-serif; display: flex; justify-content: space-between; align-items: center; }
-        button.control-btn { background: none; border: 1px solid var(--border-color); color: var(--meta-color); padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.8em; }
-        button.control-btn:hover { color: var(--text-color); border-color: var(--meta-color); }
-        
-        /* Icon Button */
-        .icon-btn { display: flex; items-center: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: none; background: transparent; cursor: pointer; color: var(--meta-color); }
-        .icon-btn:hover { color: var(--text-color); }
+        /* Header */
+        header { text-align: center; margin-bottom: 40px; }
+        h1 { font-family: 'Playfair Display', serif; font-size: 2.5em; margin: 0 0 10px 0; color: var(--heading); line-height: 1.2; }
+        .author { font-style: italic; color: var(--meta); margin: 0; }
 
-        details { border-bottom: 1px solid var(--border-color); margin-bottom: 0; }
-        details:last-child { border-bottom: none; }
-        
-        summary { list-style: none; cursor: pointer; padding: 25px 0; display: flex; justify-content: space-between; align-items: center; transition: color 0.2s; }
-        summary:hover { background-color: var(--hover-bg); padding-left: 10px; padding-right: 10px; margin: 0 -10px; border-radius: 4px; }
-        summary::-webkit-details-marker { display: none; }
-        
-        summary h2 { font-family: 'Playfair Display', serif; font-size: 1.4em; margin: 0; color: var(--heading-color); display: inline-block; }
-        .header-group { display: flex; flex-direction: column; }
-        .meta { font-family: sans-serif; font-size: 0.75em; color: var(--meta-color); margin-top: 5px; }
-        
-        summary::after { content: '+'; font-size: 1.5em; font-weight: 300; margin-left: 15px; color: var(--meta-color); }
-        details[open] summary::after { content: '-'; }
-        
-        .content { padding: 20px 0 60px 0; animation: fadeIn 0.5s ease; border-top: 1px dashed var(--border-color); margin-top: 10px; position: relative; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
 
-        .content p { margin-bottom: 1.5em; }
-        blockquote { border-left: 4px solid var(--blockquote-border); padding-left: 20px; color: var(--blockquote-color); font-style: italic; margin: 1.5em 0; }
-        ul { list-style-type: disc; padding-left: 20px; margin: 1em 0; }
-        ol { list-style-type: decimal; padding-left: 20px; margin: 1em 0; }
-        hr { border: none; border-top: 1px solid var(--border-color); margin: 40px 0; }
+        .btn-label {
+            font-family: sans-serif;
+            font-size: 0.85em;
+            color: var(--btn-text); /* High visibility */
+            cursor: pointer;
+            padding: 8px 12px;
+            border: 1px solid var(--btn-border);
+            border-radius: 4px;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 44px; /* Touch target */
+            justify-content: center;
+        }
+        .btn-label:hover {
+            border-color: var(--meta);
+            background: var(--hover);
+        }
+
+        /* Icon styling */
+        .icon-sun, .icon-moon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .icon-sun { display: none; }
         
-        .chapter-footer { display: flex; justify-content: flex-end; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color); }
-        .minimize-btn { background: transparent; border: none; font-family: sans-serif; font-size: 0.8em; color: var(--meta-color); cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
-        .minimize-btn:hover { color: var(--text-color); }
+        /* Switch icons based on state */
+        #theme-toggle:checked ~ .page-wrapper .icon-moon { display: none; }
+        #theme-toggle:checked ~ .page-wrapper .icon-sun { display: block; }
+
+        /* Sort Logic */
+        #chapter-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        
+        /* Flexbox Hack for Sorting */
+        #sort-toggle:checked ~ .page-wrapper #chapter-list {
+            flex-direction: column-reverse;
+        }
+        
+        /* Sorting Label Text Change */
+        .sort-text::after { content: "Oldest First ⬇"; }
+        #sort-toggle:checked ~ .page-wrapper .sort-text::after { content: "Newest First ⬆"; }
+
+        /* Chapter Item Structure */
+        .chapter-container {
+            border-bottom: 1px solid var(--border);
+        }
+        .chapter-container:last-child { border-bottom: none; }
+
+        .chapter-state { display: none; }
+
+        /* Chapter Header (Label) */
+        .chapter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+            cursor: pointer;
+            transition: padding 0.2s, background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .chapter-header:hover {
+            background: var(--hover);
+            padding-left: 10px;
+            padding-right: 10px;
+            margin: 0 -10px;
+            border-radius: 4px;
+        }
+
+        .header-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3em;
+            margin: 0;
+            color: var(--heading);
+        }
+        .meta {
+            font-family: sans-serif;
+            font-size: 0.75em;
+            color: var(--meta);
+            display: block;
+            margin-top: 4px;
+        }
+
+        /* Indicator (+ / -) */
+        .indicator::after {
+            content: '+';
+            font-size: 1.5em;
+            font-weight: 300;
+            color: var(--meta);
+        }
+
+        /* Checked State Styling */
+        .chapter-state:checked + .chapter-header .indicator::after {
+            content: '-';
+            color: var(--heading);
+        }
+
+        /* Content Area (Hidden by default) */
+        .chapter-content {
+            display: none;
+            padding-bottom: 40px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* Checkbox Hack: Show content when checked */
+        .chapter-state:checked ~ .chapter-content {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Rich Text Styling */
+        .inner-body {
+            font-size: 1.1em;
+            line-height: 1.8;
+            padding-top: 10px;
+        }
+        .inner-body p { margin-bottom: 1.5em; }
+        .inner-body blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 20px;
+            margin: 1.5em 0;
+            font-style: italic;
+            color: var(--quote);
+        }
+        .inner-body ul, .inner-body ol { margin: 1em 0; padding-left: 20px; }
+        .inner-body hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+        /* Footer / Close Button */
+        .chapter-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border);
+            text-align: right;
+        }
+        .minimize-btn {
+            font-family: sans-serif;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--meta);
+            cursor: pointer;
+            padding: 15px 20px; /* Larger touch target */
+            display: inline-block;
+            background: var(--hover);
+            border-radius: 4px;
+        }
+        .minimize-btn:hover { color: var(--text); background: var(--accent); }
+        
+        /* App Footer */
+        .app-footer {
+            text-align: center;
+            font-family: sans-serif;
+            font-size: 0.75em;
+            color: var(--meta);
+            margin-top: 60px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
     </style>
 </head>
-<body class="${themeMode === 'light' ? 'light' : ''}">
-    <div class="container">
+<body>
+    <!-- Global States -->
+    <input type="checkbox" id="theme-toggle" class="state-input">
+    <input type="checkbox" id="sort-toggle" class="state-input">
+    
+    <div class="page-wrapper">
         <header>
             <h1>${data.title}</h1>
             <p class="author">by ${data.author}</p>
         </header>
-        
+
         <div class="controls">
-            <button id="theme-btn" class="icon-btn" title="Toggle Theme">
-                <!-- Moon Icon -->
-                <svg id="icon-moon" style="display:none" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
-                <!-- Sun Icon -->
-                <svg id="icon-sun" style="display:none" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-            </button>
-            <button id="sort-btn" class="control-btn">Sort: Oldest First ⬇</button>
+            <label for="theme-toggle" class="btn-label" title="Toggle Theme">
+                <svg class="icon-moon" viewBox="0 0 24 24"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                <svg class="icon-sun" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </label>
+            <label for="sort-toggle" class="btn-label">
+                <span class="sort-text"></span>
+            </label>
         </div>
 
-        <main id="chapter-container">
+        <div id="chapter-list">
             ${contentHtml}
-        </main>
-        
-        <footer style="text-align: center; margin-top: 100px; font-size: 0.8em; color: var(--meta-color); font-family: sans-serif;">
+        </div>
+
+        <div class="app-footer">
             Generated by LeDelulu • Built by Asyaraenys
-        </footer>
+        </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Sorting Logic
-            const sortBtn = document.getElementById('sort-btn');
-            const container = document.getElementById('chapter-container');
-            let isOldestFirst = true;
-
-            sortBtn.addEventListener('click', () => {
-                const chapters = Array.from(container.children);
-                container.innerHTML = '';
-                chapters.reverse().forEach(c => container.appendChild(c));
-                isOldestFirst = !isOldestFirst;
-                sortBtn.textContent = isOldestFirst ? "Sort: Oldest First ⬇" : "Sort: Newest First ⬆";
-            });
-
-            // Theme Logic
-            const themeBtn = document.getElementById('theme-btn');
-            const iconMoon = document.getElementById('icon-moon');
-            const iconSun = document.getElementById('icon-sun');
-            const html = document.documentElement;
-
-            function updateIcons() {
-                const isDark = html.classList.contains('dark');
-                if (isDark) {
-                    iconMoon.style.display = 'none';
-                    iconSun.style.display = 'block';
-                } else {
-                    iconMoon.style.display = 'block';
-                    iconSun.style.display = 'none';
-                }
-            }
-
-            // Init icons
-            updateIcons();
-
-            themeBtn.addEventListener('click', () => {
-                if (html.classList.contains('dark')) {
-                    html.classList.remove('dark');
-                    html.classList.add('light'); // explicit light mode
-                } else {
-                    html.classList.add('dark');
-                    html.classList.remove('light');
-                }
-                updateIcons();
-            });
-        });
-    <\/script>
 </body>
 </html>`;
                 
