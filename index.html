@@ -132,13 +132,17 @@
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 8px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #e7e5e4; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #d6d3d1; }
         
         html.dark ::-webkit-scrollbar-thumb { background: #292524; }
         html.dark ::-webkit-scrollbar-thumb:hover { background: #44403c; }
+        
+        /* Hide scrollbar for toolbar on mobile but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* Drag and Drop Styles */
         .chapter-item {
@@ -322,73 +326,77 @@
             </div>
         </aside>
 
-        <!-- Main Editor -->
-        <main class="flex-1 h-screen overflow-y-auto relative bg-paper dark:bg-stone-950 cursor-text transition-colors w-full" id="editor-container">
+        <!-- Main Editor (Flex Column Layout to allow Sticky Toolbar outside scroll area) -->
+        <main class="flex-1 flex flex-col h-screen overflow-hidden relative bg-paper dark:bg-stone-950 transition-colors w-full">
             
-            <!-- Sticky Toolbar -->
-            <div class="sticky top-0 z-10 bg-paper/95 dark:bg-stone-950/95 backdrop-blur border-b border-stone-100 dark:border-stone-800 flex flex-col md:flex-row md:items-center select-none transition-colors">
-                <!-- Row 1 (Mobile): Menu Button -->
-                <div class="flex items-center w-full md:w-auto border-b md:border-b-0 border-stone-100 dark:border-stone-800 px-4 py-2 md:py-3 md:pl-8 md:pr-4">
-                    <button onclick="app.toggleSidebar()" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Toggle Sidebar">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                    </button>
-                </div>
+            <!-- Toolbar (Static at top, spans full width) -->
+            <div class="shrink-0 z-10 bg-paper/95 dark:bg-stone-950/95 backdrop-blur border-b border-stone-100 dark:border-stone-800 flex flex-row items-center select-none transition-colors px-4 py-2">
+                
+                <!-- Sidebar Toggle (Menu Button) -->
+                <button onclick="app.toggleSidebar()" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors shrink-0" title="Toggle Sidebar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+                
+                <!-- Separator -->
+                <div class="w-px h-6 bg-stone-200 dark:bg-stone-800 mx-3 shrink-0"></div>
 
-                <!-- Row 2 (Mobile): Tools -->
-                <div class="flex items-center gap-1 flex-wrap px-4 py-2 md:py-3 md:pl-0 md:pr-8 w-full md:w-auto">
-                    <button onclick="document.execCommand('undo')" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Undo">
+                <!-- Tools (Scrollable on small screens) -->
+                <div class="flex items-center gap-1 overflow-x-auto no-scrollbar flex-1 whitespace-nowrap">
+                    <button onclick="document.execCommand('undo')" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors shrink-0" title="Undo">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
                     </button>
-                    <button onclick="document.execCommand('redo')" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors mr-2" title="Redo">
+                    <button onclick="document.execCommand('redo')" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors mr-2 shrink-0" title="Redo">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" /></svg>
                     </button>
                     
-                    <div class="w-px h-5 bg-stone-200 dark:bg-stone-800 mx-1"></div>
+                    <div class="w-px h-5 bg-stone-200 dark:bg-stone-800 mx-1 shrink-0"></div>
 
                     <!-- Rich Text Buttons -->
-                    <button id="btn-bold" onmousedown="event.preventDefault(); document.execCommand('bold'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif font-bold transition-colors" title="Bold">B</button>
-                    <button id="btn-italic" onmousedown="event.preventDefault(); document.execCommand('italic'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif italic transition-colors" title="Italic">I</button>
-                    <button id="btn-underline" onmousedown="event.preventDefault(); document.execCommand('underline'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif underline transition-colors" title="Underline">U</button>
+                    <button id="btn-bold" onmousedown="event.preventDefault(); document.execCommand('bold'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif font-bold transition-colors shrink-0" title="Bold">B</button>
+                    <button id="btn-italic" onmousedown="event.preventDefault(); document.execCommand('italic'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif italic transition-colors shrink-0" title="Italic">I</button>
+                    <button id="btn-underline" onmousedown="event.preventDefault(); document.execCommand('underline'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif underline transition-colors shrink-0" title="Underline">U</button>
                     
-                    <div class="w-px h-5 bg-stone-200 dark:bg-stone-800 mx-1"></div>
+                    <div class="w-px h-5 bg-stone-200 dark:bg-stone-800 mx-1 shrink-0"></div>
                     
                     <!-- Lists and HR -->
-                    <button id="btn-insertUnorderedList" onmousedown="event.preventDefault(); document.execCommand('insertUnorderedList'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif transition-colors text-lg leading-none" title="Bullet List">•</button>
-                    <button id="btn-insertOrderedList" onmousedown="event.preventDefault(); document.execCommand('insertOrderedList'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif transition-colors text-sm" title="Numbered List">1.</button>
-                    <button onmousedown="event.preventDefault(); document.execCommand('insertHorizontalRule')" class="p-2 w-8 h-8 flex items-center justify-center text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" title="Scene Break">
+                    <button id="btn-insertUnorderedList" onmousedown="event.preventDefault(); document.execCommand('insertUnorderedList'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif transition-colors text-lg leading-none shrink-0" title="Bullet List">•</button>
+                    <button id="btn-insertOrderedList" onmousedown="event.preventDefault(); document.execCommand('insertOrderedList'); app.updateToolbar();" class="toolbar-btn p-2 w-8 h-8 flex items-center justify-center text-stone-600 dark:text-stone-400 rounded hover:bg-stone-100 dark:hover:bg-stone-800 font-serif transition-colors text-sm shrink-0" title="Numbered List">1.</button>
+                    <button onmousedown="event.preventDefault(); document.execCommand('insertHorizontalRule')" class="p-2 w-8 h-8 flex items-center justify-center text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 rounded hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors shrink-0" title="Scene Break">
                         <span class="block w-4 h-px bg-current"></span>
                     </button>
                 </div>
             </div>
 
-            <!-- Writing Area -->
-            <div class="max-w-3xl mx-auto px-6 md:px-8 pb-32 pt-12">
-                <!-- Auto-expanding Title -->
-                <textarea 
-                    id="chapter-title-input" 
-                    rows="1" 
-                    placeholder="Chapter Title"
-                    class="w-full text-4xl md:text-5xl font-display font-bold text-stone-900 dark:text-stone-100 placeholder-stone-300 dark:placeholder-stone-700 bg-transparent border-none outline-none resize-none overflow-hidden leading-tight mb-2 p-0"
-                    style="min-height: 60px;"
-                ></textarea>
-                
-                <!-- Chapter Date Input -->
-                <input 
-                    type="text" 
-                    id="chapter-date-input" 
-                    placeholder="Chapter Date (e.g. Oct 27, 2024)" 
-                    class="w-full bg-transparent font-sans text-sm text-stone-500 dark:text-stone-400 placeholder-stone-300 dark:placeholder-stone-700 outline-none mb-8 focus:text-stone-900 dark:focus:text-stone-200 transition-colors"
-                >
+            <!-- Scrollable Writing Area -->
+            <div id="editor-container" class="flex-1 overflow-y-auto w-full cursor-text relative">
+                <div class="max-w-3xl mx-auto px-6 md:px-8 pb-32 pt-12">
+                    <!-- Auto-expanding Title -->
+                    <textarea 
+                        id="chapter-title-input" 
+                        rows="1" 
+                        placeholder="Chapter Title"
+                        class="w-full text-4xl md:text-5xl font-display font-bold text-stone-900 dark:text-stone-100 placeholder-stone-300 dark:placeholder-stone-700 bg-transparent border-none outline-none resize-none overflow-hidden leading-tight mb-2 p-0"
+                        style="min-height: 60px;"
+                    ></textarea>
+                    
+                    <!-- Chapter Date Input -->
+                    <input 
+                        type="text" 
+                        id="chapter-date-input" 
+                        placeholder="Chapter Date (e.g. Oct 27, 2024)" 
+                        class="w-full bg-transparent font-sans text-sm text-stone-500 dark:text-stone-400 placeholder-stone-300 dark:placeholder-stone-700 outline-none mb-8 focus:text-stone-900 dark:focus:text-stone-200 transition-colors"
+                    >
 
-                <!-- Body Content -->
-                <div 
-                    id="chapter-body-input" 
-                    contenteditable="true" 
-                    data-placeholder="Start writing your delusion..."
-                    class="editor-content font-serif text-lg leading-loose text-ink dark:text-stone-300 caret-stone-900 dark:caret-stone-100"
-                ></div>
-                
-                <div class="h-[20vh]" id="bottom-spacer"></div>
+                    <!-- Body Content -->
+                    <div 
+                        id="chapter-body-input" 
+                        contenteditable="true" 
+                        data-placeholder="Start writing your delusion..."
+                        class="editor-content font-serif text-lg leading-loose text-ink dark:text-stone-300 caret-stone-900 dark:caret-stone-100"
+                    ></div>
+                    
+                    <div class="h-[20vh]" id="bottom-spacer"></div>
+                </div>
             </div>
 
         </main>
@@ -416,7 +424,7 @@
             </div>
 
             <div class="p-4 border-t border-stone-100 dark:border-stone-800 grid grid-cols-2 gap-3 bg-white dark:bg-stone-900 rounded-b-lg">
-                <button onclick="app.performExport('json')" class="py-2 px-4 rounded-md border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 font-sans text-sm hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+                <button onclick="app.performExport('json')" class="py-2 px-4 rounded-md border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 font-sans text-sm hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:text-stone-100 transition-colors">
                     Export JSON
                 </button>
                 <button onclick="app.performExport('html')" class="py-2 px-4 rounded-md bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-sans text-sm hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors shadow-sm">
@@ -500,6 +508,7 @@
                 document.addEventListener('selectionchange', () => app.updateToolbar());
 
                 // 5. Click to Focus Editor
+                // NOTE: Listener moved to the new scrollable container
                 document.getElementById('editor-container').addEventListener('click', (e) => {
                     if (e.target.id === 'editor-container' || e.target.id === 'bottom-spacer') {
                         const editor = document.getElementById('chapter-body-input');
@@ -674,6 +683,7 @@
 
             exitToPortal() {
                 if (!this.checkUnsaved()) return;
+                
                 this.switchView('portal');
                 // We re-check for draft to show the button if they exited
                 if (localStorage.getItem('ledelulu_draft')) {
@@ -944,9 +954,10 @@
                 this.data.chapters.forEach((chapter, index) => {
                     const div = document.createElement('div');
                     div.className = 'flex items-center gap-3 p-2 hover:bg-stone-50 dark:hover:bg-stone-800 rounded transition-colors';
+                    // REMOVED VISUAL NUMBERING FROM LIST (e.g. index+1)
                     div.innerHTML = `
                         <input type="checkbox" class="export-checkbox w-4 h-4 accent-stone-900 dark:accent-stone-100 cursor-pointer" id="export-ch-${index}" checked value="${index}">
-                        <label for="export-ch-${index}" class="text-sm font-sans truncate cursor-pointer select-none flex-1 text-stone-700 dark:text-stone-300">${index + 1}. ${chapter.title || 'Untitled'}</label>
+                        <label for="export-ch-${index}" class="text-sm font-sans truncate cursor-pointer select-none flex-1 text-stone-700 dark:text-stone-300">${chapter.title || 'Untitled'}</label>
                     `;
                     list.appendChild(div);
                 });
@@ -1011,7 +1022,7 @@
                 }
             },
 
-            publishHTML(data = this.data, themeMode = 'system') {
+            publishHTML(data = this.data) {
                 const contentHtml = data.chapters.map((c, index) => {
                     const dateDisplay = c.date ? c.date : '';
                     // Checkbox hack for independent toggling (better for mobile webviews)
@@ -1032,12 +1043,14 @@
                             </div>
                             <div class="chapter-footer">
                                 <!-- Target the specific chapter checkbox to close it -->
-                                <label for="ch-${index}" class="minimize-btn">Close Chapter ▲</label>
+                                <label for="ch-${index}" class="minimize-btn" onclick="document.getElementById('ch-${index}').checked = false; return false;">Close Chapter ▲</label>
                             </div>
                         </div>
                     </div>`;
                 }).join('');
 
+                // CSS-Only Export Template (Zero Javascript)
+                // Using Checkbox Hacks for Sorting and Theme Toggle
                 const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1058,19 +1071,41 @@
             --quote: #57534e;
             --btn-text: #44403c; /* Darker for visibility */
             --btn-border: #d6d3d1;
+            
+            /* Icon Colors for Light Mode */
+            --icon-color: #57534e; /* Stone 600 - Darker for visibility on white */
+            --icon-hover: #1c1917;
         }
 
         /* Base Reset */
         * { box-sizing: border-box; }
-        body { margin: 0; padding: 0; font-family: 'Merriweather', serif; transition: background 0.3s, color 0.3s; background: var(--bg); color: var(--text); }
+        
+        /* 
+           Body has light background by default.
+           The wrapper controls the dark mode overlay.
+        */
+        body { margin: 0; padding: 0; font-family: 'Merriweather', serif; transition: background 0.3s, color 0.3s; background-color: #fdfdfd; color: #333333; }
         
         /* State Inputs - Hidden */
         .state-input { display: none; }
 
-        /* Theme Logic via Sibling Selector */
+        /* Wrapper controls the content colors and overlay */
+        .page-wrapper {
+            position: relative;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: transparent;
+            min-height: 100vh;
+            z-index: 1;
+            /* Explicitly set color here so it cascades */
+            color: var(--text); 
+        }
+
+        /* Dark Mode Override */
         #theme-toggle:checked ~ .page-wrapper {
-            --bg: #0c0a09;
-            --text: #d6d3d1;
+            --bg: #0c0a09; /* Stone 950 (App Dark BG) */
+            --text: #d6d3d1; /* Stone 300 (App Dark Text) */
             --heading: #f5f5f4;
             --meta: #a8a29e;
             --border: #292524;
@@ -1079,14 +1114,25 @@
             --quote: #a8a29e;
             --btn-text: #a8a29e;
             --btn-border: #44403c;
+            
+            /* Icon Colors for Dark Mode */
+            --icon-color: #a8a29e; /* Stone 400 */
+            --icon-hover: #d6d3d1;
+            
+            /* Apply color change to text */
+            color: var(--text);
         }
-
-        .page-wrapper {
-            max-width: 700px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            background: var(--bg);
-            min-height: 100vh;
+        
+        /* Full Screen Dark Overlay */
+        #theme-toggle:checked ~ .page-wrapper::before {
+            content: "";
+            position: fixed;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background-color: #0c0a09; /* Matches Stone 950 */
+            z-index: -1;
         }
 
         /* Header */
@@ -1118,6 +1164,7 @@
             gap: 6px;
             min-width: 44px; /* Touch target */
             justify-content: center;
+            background: var(--bg);
         }
         .btn-label:hover {
             border-color: var(--meta);
@@ -1125,7 +1172,19 @@
         }
 
         /* Icon styling */
-        .icon-sun, .icon-moon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .icon-sun, .icon-moon { 
+            width: 20px; 
+            height: 20px; 
+            fill: none; 
+            stroke: var(--icon-color); 
+            stroke-width: 2; 
+            stroke-linecap: round; 
+            stroke-linejoin: round; 
+        }
+        .btn-label:hover .icon-sun, .btn-label:hover .icon-moon {
+            stroke: var(--icon-hover);
+        }
+        
         .icon-sun { display: none; }
         
         /* Switch icons based on state */
@@ -1254,6 +1313,10 @@
             display: inline-block;
             background: var(--hover);
             border-radius: 4px;
+            width: 100%; /* Full width for easier mobile tapping */
+            text-align: center;
+            box-sizing: border-box;
+            touch-action: manipulation;
         }
         .minimize-btn:hover { color: var(--text); background: var(--accent); }
         
@@ -1267,7 +1330,7 @@
             border-top: 1px solid var(--border);
             padding-top: 20px;
         }
-    </style>
+    \x3C/style>
 </head>
 <body>
     <!-- Global States -->
@@ -1283,7 +1346,7 @@
         <div class="controls">
             <label for="theme-toggle" class="btn-label" title="Toggle Theme">
                 <svg class="icon-moon" viewBox="0 0 24 24"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                <svg class="icon-sun" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg class="icon-sun" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707M12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
             </label>
             <label for="sort-toggle" class="btn-label">
                 <span class="sort-text"></span>
@@ -1298,6 +1361,27 @@
             Generated by LeDelulu • Built by Asyaraenys
         </div>
     </div>
+    
+    \x3Cscript>
+       // Helper logic just to make the close button 100% reliable on all mobile devices
+       // even if CSS :checked logic has quirks in some webviews
+       document.addEventListener('click', function(e) {
+           if (e.target.classList.contains('minimize-btn')) {
+               // Find the closest chapter container
+               var container = e.target.closest('.chapter-container');
+               if (container) {
+                   var checkbox = container.querySelector('.chapter-state');
+                   if (checkbox) {
+                       checkbox.checked = false;
+                       // Force redraw for quirky webviews
+                       container.style.display = 'none';
+                       container.offsetHeight; // trigger reflow
+                       container.style.display = '';
+                   }
+               }
+           }
+       });
+    \x3C/script>
 </body>
 </html>`;
                 
