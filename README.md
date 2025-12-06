@@ -1,20 +1,39 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+<img width="1200" height="475" alt="LeDelulu" src="https://github.com/user-attachments/assets/640014f2-6bdb-4b19-b1ce-cc823456ad0e" />
 </div>
 
-# Run and deploy your AI Studio app
 
-This contains everything you need to run your app locally.
+# ✨ [**LeDelulu Studio**](https://asyaraenys.github.io/LeDelulu-Studio/) ✨
 
-View your app in AI Studio: https://ai.studio/apps/drive/1JIe94H33hQB2r83nsCOcnwtQsgVkaI79
-
-## Run Locally
-
-**Prerequisites:**  Node.js
+Where your delusions become literature.
 
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## ☁️ What is this?
+
+LeDelulu is a minimalist, distraction-free writing studio designed specifically for fanfiction writers who want privacy, aesthetics, and peace of mind.
+
+It runs entirely in your browser (offline-first!), meaning no servers see your drafts, no AI scrapes your rarepairs, and no logins are required. It's just you and the text.
+
+## 🎀 Key Features
+
+- Zero-Trust Privacy: Your stories live in your browser's memory (localStorage). Nothing is sent to the cloud until you decide to export.
+- A beautiful, clean writing interface with generous whitespace and elegant fonts (Merriweather & Playfair Display).
+- Click-to-Focus: Click anywhere on the page to start typing immediately. No aiming required.
+- Safety Net: Auto-saves to local memory (save .json often!) and warns you before you close the tab with unsaved changes.
+- The "Reader Mode" Export: One click generates a simple, standalone .html file of your entire book (with accordion chapters!) to send to friends.
+
+## 🛠️ How to Use
+
+1. Open the Link: Click the link above to enter the studio.
+2. Start Writing: Use the rich text toolbar for Bold, Italics, lists, and scene breaks.
+3. Add Chapters: Use the sidebar to manage your multi-chapter masterpiece.
+4. Save Backups: Click Save Project (JSON) to download your raw data (keep this safe!).
+5. Publish: Click Publish HTML to get a beautiful file ready for sharing.
+
+## 📥 Managing Files
+
+- Merging: Wrote Chapter 3 on your phone? Export it as a JSON, then open your Main Story on your laptop and click Import. It merges them intelligently!
+- Moving Devices: Just save your .json file and load it on any other device running LeDelulu.
+
+## 💖 Credits
+
+Built with HTML, CSS, and pure Delusion by © Asyaraenys. 
