@@ -2,7 +2,7 @@
 </div>
 
 
-# ✨ **[LeDelulu Studio]**(https://asyaraenys.github.io/LeDelulu-Studio/) ✨
+# ✨ **[LeDelulu Studio]** (https://asyaraenys.github.io/LeDelulu-Studio/) ✨
 
 Where your delusions become literature.
 
