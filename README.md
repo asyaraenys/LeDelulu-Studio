@@ -14,11 +14,11 @@ It runs entirely in your browser (offline-first!), meaning no servers see your d
 
 # 🎀 Key Features
 
-1. Zero-Trust Privacy: Your stories live in your browser's memory (localStorage). Nothing is sent to the cloud until you decide to export.
-2.  A beautiful, clean writing interface with generous whitespace and elegant fonts (Merriweather & Playfair Display).
-3.  Click-to-Focus: Click anywhere on the page to start typing immediately. No aiming required.
-4.  Safety Net: Auto-saves to local memory and warns you before you close the tab with unsaved changes.
-5.  The "Reader Mode" Export: One click generates a simple, standalone .html file of your entire book (with accordion chapters!) to send to friends.
+- Zero-Trust Privacy: Your stories live in your browser's memory (localStorage). Nothing is sent to the cloud until you decide to export.
+- A beautiful, clean writing interface with generous whitespace and elegant fonts (Merriweather & Playfair Display).
+- Click-to-Focus: Click anywhere on the page to start typing immediately. No aiming required.
+- Safety Net: Auto-saves to local memory (save .json often!) and warns you before you close the tab with unsaved changes.
+- The "Reader Mode" Export: One click generates a simple, standalone .html file of your entire book (with accordion chapters!) to send to friends.
 
 # 🛠️ How to Use
 
