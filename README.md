@@ -30,8 +30,8 @@ It runs entirely in your browser (offline-first!), meaning no servers see your d
 
 # 📥 Managing Files
 
-> Merging: Wrote Chapter 3 on your phone? Export it as a JSON, then open your Main Story on your laptop and click Import. It merges them intelligently!
-> Moving Devices: Just save your .json file and load it on any other device running LeDelulu.
+- Merging: Wrote Chapter 3 on your phone? Export it as a JSON, then open your Main Story on your laptop and click Import. It merges them intelligently!
+- Moving Devices: Just save your .json file and load it on any other device running LeDelulu.
 
 # 💖 Credits
 
