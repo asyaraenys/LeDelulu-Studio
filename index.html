@@ -232,7 +232,7 @@
              <button onclick="app.toggleTheme()" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors" title="Toggle Theme">
                 <svg id="theme-icon-portal" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
              </button>
-             <p class="text-xs text-stone-300 dark:text-stone-600 font-sans">v1.6 • Offline Studio • Built by Asyaraenys</p>
+             <p class="text-xs text-stone-300 dark:text-stone-600 font-sans">v1.7 • Offline Studio • Built by Asyaraenys</p>
         </div>
     </div>
 
@@ -309,11 +309,12 @@
                     </button>
                 </div>
                 
-                <div class="pt-2 flex gap-2">
-                     <button onclick="app.toggleTheme()" class="flex-1 py-2 text-xs font-sans text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Switch Light/Dark Mode">
-                        <span id="theme-btn-text">Light Mode</span>
+                <!-- Row 3: Theme/Exit (Aligned) -->
+                <div class="grid grid-cols-2 gap-2">
+                     <button onclick="app.toggleTheme()" class="py-2 text-xs font-sans text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded border border-transparent hover:border-stone-200 dark:hover:border-stone-700 flex items-center justify-center transition-colors" title="Switch Light/Dark Mode">
+                        <svg id="theme-icon-sidebar" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"></svg>
                      </button>
-                     <button onclick="app.exitToPortal()" class="px-3 py-2 text-xs font-sans text-stone-400 hover:text-red-500 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Exit to Home">
+                     <button onclick="app.exitToPortal()" class="py-2 text-xs font-sans text-stone-400 hover:text-red-500 hover:bg-stone-100 dark:hover:bg-stone-800 rounded border border-transparent hover:border-stone-200 dark:hover:border-stone-700 transition-colors" title="Exit to Home" type="button">
                         Exit
                      </button>
                 </div>
@@ -397,14 +398,14 @@
     <div id="export-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-stone-900 rounded-lg shadow-xl w-full max-w-md flex flex-col max-h-[80vh] border border-stone-200 dark:border-stone-800">
             <div class="p-4 border-b border-stone-100 dark:border-stone-800 flex justify-between items-center">
-                <h3 class="font-sans font-bold text-stone-900 dark:text-stone-100">Select Chapters to Export</h3>
+                <h3 class="font-sans font-bold text-stone-900 dark:text-stone-100">Export Options</h3>
                 <button onclick="app.closeExportModal()" class="text-stone-400 hover:text-stone-900 dark:hover:text-stone-200">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
             
             <div class="p-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-950">
-                 <div class="flex items-center gap-2">
+                 <div class="flex items-center gap-2 mb-4">
                     <input type="checkbox" id="export-select-all" class="w-4 h-4 accent-stone-900 dark:accent-stone-100 cursor-pointer">
                     <label for="export-select-all" class="text-xs font-sans font-medium uppercase text-stone-500 dark:text-stone-400 cursor-pointer select-none">Select All / None</label>
                  </div>
@@ -481,6 +482,15 @@
                 const bodyInput = document.getElementById('chapter-body-input');
                 bodyInput.addEventListener('input', () => {
                     app.saveCurrentChapter();
+                });
+
+                // PASTE SANITIZATION
+                bodyInput.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    // Get plain text only
+                    const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                    // Insert at cursor
+                    document.execCommand('insertText', false, text);
                 });
                 
                 // 4. Toolbar Update Triggers
@@ -567,16 +577,18 @@
             
             updateThemeIcons(isDark) {
                 const icon = document.getElementById('theme-icon-portal');
-                const btnText = document.getElementById('theme-btn-text');
+                const sidebarIcon = document.getElementById('theme-icon-sidebar');
+                const sunPath = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />';
+                const moonPath = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
                 
                 if (isDark) {
                      // Sun icon for "Switch to Light"
-                    if(icon) icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />';
-                    if(btnText) btnText.textContent = "Light Mode";
+                    if(icon) icon.innerHTML = sunPath;
+                    if(sidebarIcon) sidebarIcon.innerHTML = sunPath;
                 } else {
                     // Moon icon for "Switch to Dark"
-                    if(icon) icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
-                    if(btnText) btnText.textContent = "Dark Mode";
+                    if(icon) icon.innerHTML = moonPath;
+                    if(sidebarIcon) sidebarIcon.innerHTML = moonPath;
                 }
             },
             
@@ -965,6 +977,8 @@
                     chapters: selectedChapters
                 };
                 
+                // REMOVED Theme selection logic, defaulting to system
+
                 if (type === 'json') {
                     this.exportJSON(exportData);
                 } else {
@@ -974,12 +988,20 @@
                 this.closeExportModal();
             },
 
+            getFormattedFilename(ext) {
+                const now = new Date();
+                const dateStr = now.toISOString().slice(0,10);
+                const timeStr = now.toTimeString().slice(0,5).replace(':','-');
+                const safeTitle = (this.data.title || 'untitled').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                const safeAuthor = (this.data.author || 'unknown').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                return `LeDelulu_${safeTitle}_${safeAuthor}_${dateStr}_${timeStr}.${ext}`;
+            },
+
             exportJSON(data = this.data) {
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
                 const downloadAnchorNode = document.createElement('a');
                 downloadAnchorNode.setAttribute("href", dataStr);
-                const safeTitle = data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-                downloadAnchorNode.setAttribute("download", safeTitle + ".json");
+                downloadAnchorNode.setAttribute("download", this.getFormattedFilename('json'));
                 document.body.appendChild(downloadAnchorNode);
                 downloadAnchorNode.click();
                 downloadAnchorNode.remove();
@@ -991,8 +1013,7 @@
                 }
             },
 
-            publishHTML(data = this.data) {
-                const safeTitle = data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            publishHTML(data = this.data, themeMode = 'system') {
                 const contentHtml = data.chapters.map((c, index) => {
                     const isOpen = index === data.chapters.length - 1 ? 'open' : '';
                     const dateDisplay = c.date ? c.date : '';
@@ -1008,6 +1029,7 @@
                     </details>`;
                 }).join('');
 
+                // IMPORTANT: All script tags inside this template must use \x3Cscript or <\/script> to prevent breaking the main file parser
                 const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1015,6 +1037,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${data.title} - ${data.author}</title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script>
+        // Injected Theme Mode: ${themeMode}
+        (function() {
+            const mode = '${themeMode}';
+            if (mode === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else if (mode === 'light') {
+                document.documentElement.classList.remove('dark');
+            } else {
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                }
+            }
+        })();
+    <\/script>
     <style>
         :root {
             --bg-color: #fdfdfd;
@@ -1028,8 +1065,20 @@
             --hover-bg: #f5f5f4;
         }
 
+        .dark {
+            --bg-color: #0c0a09;
+            --text-color: #d6d3d1;
+            --heading-color: #f5f5f4;
+            --meta-color: #a8a29e;
+            --border-color: #292524;
+            --divider-color: #44403c;
+            --blockquote-border: #44403c;
+            --blockquote-color: #a8a29e;
+            --hover-bg: #1c1917;
+        }
+
         @media (prefers-color-scheme: dark) {
-            :root {
+            :root:not(.light) {
                 --bg-color: #0c0a09;
                 --text-color: #d6d3d1;
                 --heading-color: #f5f5f4;
@@ -1049,9 +1098,9 @@
         .author { font-style: italic; color: var(--meta-color); }
         
         /* Accordion Styles */
-        .controls { text-align: right; margin-bottom: 20px; font-family: sans-serif; }
-        button#sort-btn { background: none; border: 1px solid var(--border-color); color: var(--meta-color); padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.8em; }
-        button#sort-btn:hover { color: var(--text-color); border-color: var(--meta-color); }
+        .controls { text-align: right; margin-bottom: 20px; font-family: sans-serif; display: flex; justify-content: space-between; align-items: center; }
+        button.control-btn { background: none; border: 1px solid var(--border-color); color: var(--meta-color); padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.8em; }
+        button.control-btn:hover { color: var(--text-color); border-color: var(--meta-color); }
 
         details { border-bottom: 1px solid var(--border-color); margin-bottom: 0; }
         details:last-child { border-bottom: none; }
@@ -1077,7 +1126,7 @@
         hr { border: none; border-top: 1px solid var(--border-color); margin: 40px 0; }
     </style>
 </head>
-<body>
+<body class="${themeMode === 'light' ? 'light' : ''}">
     <div class="container">
         <header>
             <h1>${data.title}</h1>
@@ -1085,7 +1134,11 @@
         </header>
         
         <div class="controls">
-            <button id="sort-btn">Sort: Oldest First ⬇</button>
+            <button id="theme-btn" class="control-btn" title="Toggle Theme">
+                <span id="icon-moon">🌙</span>
+                <span id="icon-sun" style="display:none">☀️</span>
+            </button>
+            <button id="sort-btn" class="control-btn">Sort: Oldest First ⬇</button>
         </div>
 
         <main id="chapter-container">
@@ -1098,16 +1151,47 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('sort-btn');
+            // Sorting Logic
+            const sortBtn = document.getElementById('sort-btn');
             const container = document.getElementById('chapter-container');
             let isOldestFirst = true;
 
-            btn.addEventListener('click', () => {
+            sortBtn.addEventListener('click', () => {
                 const chapters = Array.from(container.children);
                 container.innerHTML = '';
                 chapters.reverse().forEach(c => container.appendChild(c));
                 isOldestFirst = !isOldestFirst;
-                btn.textContent = isOldestFirst ? "Sort: Oldest First ⬇" : "Sort: Newest First ⬆";
+                sortBtn.textContent = isOldestFirst ? "Sort: Oldest First ⬇" : "Sort: Newest First ⬆";
+            });
+
+            // Theme Logic
+            const themeBtn = document.getElementById('theme-btn');
+            const iconMoon = document.getElementById('icon-moon');
+            const iconSun = document.getElementById('icon-sun');
+            const html = document.documentElement;
+
+            function updateIcons() {
+                if (html.classList.contains('dark')) {
+                    iconMoon.style.display = 'none';
+                    iconSun.style.display = 'inline';
+                } else {
+                    iconMoon.style.display = 'inline';
+                    iconSun.style.display = 'none';
+                }
+            }
+
+            // Init icons
+            updateIcons();
+
+            themeBtn.addEventListener('click', () => {
+                if (html.classList.contains('dark')) {
+                    html.classList.remove('dark');
+                    html.classList.add('light'); // explicit light mode
+                } else {
+                    html.classList.add('dark');
+                    html.classList.remove('light');
+                }
+                updateIcons();
             });
         });
     <\/script>
@@ -1118,7 +1202,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `LeDelulu_${safeTitle}.html`;
+                a.download = this.getFormattedFilename('html');
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -1143,6 +1227,9 @@
                         // Handle LeDelulu format (Story Object)
                         if (json.chapters && Array.isArray(json.chapters)) {
                             newChapters = json.chapters;
+                            // SMART IMPORT: Update Title/Author if present
+                            if (json.title && json.title !== "Untitled Story") this.data.title = json.title;
+                            if (json.author && json.author !== "Unknown Author") this.data.author = json.author;
                         } 
                         // Handle simple array of chapters
                         else if (Array.isArray(json)) {
