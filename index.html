@@ -168,71 +168,108 @@
         html.dark .chapter-item.drag-over-bottom {
             border-bottom: 2px solid #a8a29e;
         }
+        
+        /* Sidebar Transitions */
+        #sidebar {
+            transition: transform 0.3s ease, width 0.3s ease;
+        }
+        /* Mobile: Hidden by default (translated left) */
+        .sidebar-mobile-closed {
+            transform: translateX(-100%);
+        }
+        .sidebar-mobile-open {
+            transform: translateX(0);
+        }
+        
+        /* Desktop: Collapsed state */
+        @media (min-width: 768px) {
+            .sidebar-desktop-closed {
+                width: 0 !important;
+                overflow: hidden;
+                border: none;
+            }
+            .sidebar-desktop-open {
+                width: 18rem; /* w-72 */
+            }
+        }
     </style>
 <script type="importmap">
 {
   "imports": {
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/"
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1"
   }
 }
 </script>
 </head>
 <body class="antialiased selection:bg-stone-200 dark:selection:bg-stone-800 selection:text-stone-900 dark:selection:text-stone-100">
 
-    <!-- VIEW: PORTAL (HOME) -->
-    <div id="view-portal" class="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center p-4 transition-colors">
-        <div class="max-w-md w-full text-center space-y-8 animate-fade-in">
-            <h1 class="font-display text-6xl md:text-8xl font-bold text-stone-900 dark:text-stone-100 tracking-tighter">LeDelulu</h1>
-            <p class="font-serif text-stone-500 dark:text-stone-400 italic">Where your delusions become canon.</p>
+    <!-- VIEW A: THE PORTAL -->
+    <div id="view-portal" class="min-h-screen flex flex-col items-center justify-center p-6 text-center dark:bg-stone-950 transition-colors">
+        <h1 class="font-display text-6xl md:text-8xl font-bold text-stone-900 dark:text-stone-100 mb-4 tracking-tight">LeDelulu</h1>
+        <p class="font-serif text-stone-500 dark:text-stone-400 italic mb-12 text-lg">Where your delusions become literature.</p>
+        
+        <div class="flex flex-col md:flex-row gap-6 w-full max-w-md">
+            <button onclick="app.startNew()" class="flex-1 bg-stone-900 dark:bg-stone-100 text-stone-50 dark:text-stone-900 py-4 px-6 rounded-lg font-sans font-medium hover:bg-stone-800 dark:hover:bg-stone-200 transition-transform active:scale-95 shadow-lg">
+                Start New Delusion
+            </button>
             
-            <div class="space-y-3 pt-8 flex flex-col items-center">
-                <button id="btn-continue" onclick="app.continueDraft()" class="hidden w-64 py-3 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded font-sans font-medium hover:scale-105 transition-transform shadow-lg">
-                    Continue Saved Draft
-                </button>
-                <button onclick="app.startNew()" class="w-64 py-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 rounded font-sans font-medium hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
-                    Start New Delusion
-                </button>
-                <button onclick="app.triggerLoad(true)" class="w-64 py-3 text-stone-500 dark:text-stone-400 text-sm hover:text-stone-900 dark:hover:text-stone-200 transition-colors">
-                    Load from File (.json)
-                </button>
-                <input type="file" id="portal-upload" accept=".json" class="hidden" onchange="app.loadFromFile(this)">
-            </div>
-            
-            <div class="pt-8">
-                <button onclick="app.toggleTheme()" class="p-2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded-full transition-colors" title="Toggle Theme">
-                   <span id="portal-theme-icon"></span>
-                </button>
-            </div>
+            <button onclick="document.getElementById('file-upload').click()" class="flex-1 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-800 dark:text-stone-200 py-4 px-6 rounded-lg font-sans font-medium hover:bg-stone-50 dark:hover:bg-stone-800 transition-transform active:scale-95 shadow-sm">
+                Resume Delusion
+            </button>
+            <input type="file" id="file-upload" accept=".json" class="hidden" onchange="app.loadFromFile(this)">
+        </div>
+        
+        <!-- Continue Draft Button (Hidden by default) -->
+        <div id="continue-draft-container" class="mt-6 hidden">
+             <button onclick="app.continueDraft()" class="text-stone-500 dark:text-stone-400 underline hover:text-stone-800 dark:hover:text-stone-200 text-sm font-sans">
+                Continue saved draft
+             </button>
+        </div>
+        
+        <div class="mt-16 flex flex-col items-center gap-4">
+             <button onclick="app.toggleTheme()" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors" title="Toggle Theme">
+                <svg id="theme-icon-portal" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+             </button>
+             <p class="text-xs text-stone-300 dark:text-stone-600 font-sans">v1.6 • Offline Studio</p>
         </div>
     </div>
 
-    <!-- VIEW: THE STUDIO -->
-    <div id="view-studio" class="hidden min-h-screen flex flex-col md:flex-row bg-white dark:bg-stone-950 transition-colors">
+    <!-- VIEW B: THE STUDIO -->
+    <div id="view-studio" class="hidden min-h-screen flex bg-white dark:bg-stone-950 transition-colors relative">
         
+        <!-- Sidebar Overlay (Mobile) -->
+        <div id="sidebar-overlay" onclick="app.toggleSidebar()" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden"></div>
+
         <!-- Sidebar -->
-        <aside class="w-full md:w-72 bg-stone-50 dark:bg-stone-900 border-r border-stone-100 dark:border-stone-800 flex flex-col h-[100dvh] sticky top-0 z-20 transition-colors">
-            <div class="p-6 border-b border-stone-100 dark:border-stone-800 relative">
-                <!-- Editable Title -->
-                <input 
-                    type="text" 
-                    id="project-title-input" 
-                    class="w-full bg-transparent font-display text-2xl font-bold text-stone-900 dark:text-stone-100 placeholder-stone-300 dark:placeholder-stone-700 outline-none mb-1 focus:placeholder-transparent" 
-                    placeholder="Story Title"
-                    autocomplete="off"
-                >
-                <!-- Editable Author -->
-                <div class="flex items-center">
-                    <span class="font-sans text-xs text-stone-400 uppercase tracking-widest mr-2 shrink-0 select-none">By</span>
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-72 md:relative md:w-72 bg-stone-50 dark:bg-stone-900 border-r border-stone-100 dark:border-stone-800 flex flex-col h-[100dvh] transition-transform md:transition-all sidebar-mobile-closed md:sidebar-desktop-open">
+            <div class="p-6 border-b border-stone-100 dark:border-stone-800 relative flex gap-2">
+                <div class="flex-1 min-w-0">
+                    <!-- Editable Title -->
                     <input 
                         type="text" 
-                        id="project-author-input" 
-                        class="w-full bg-transparent font-sans text-xs text-stone-500 dark:text-stone-400 uppercase tracking-widest placeholder-stone-300 dark:placeholder-stone-700 outline-none focus:text-stone-900 dark:focus:text-stone-200" 
-                        placeholder="Author Name"
+                        id="project-title-input" 
+                        class="w-full bg-transparent font-display text-2xl font-bold text-stone-900 dark:text-stone-100 placeholder-stone-300 dark:placeholder-stone-700 outline-none mb-1 focus:placeholder-transparent" 
+                        placeholder="Story Title"
                         autocomplete="off"
                     >
+                    <!-- Editable Author -->
+                    <div class="flex items-center">
+                        <span class="font-sans text-xs text-stone-400 uppercase tracking-widest mr-2 shrink-0 select-none">By</span>
+                        <input 
+                            type="text" 
+                            id="project-author-input" 
+                            class="w-full bg-transparent font-sans text-xs text-stone-500 dark:text-stone-400 uppercase tracking-widest placeholder-stone-300 dark:placeholder-stone-700 outline-none focus:text-stone-900 dark:focus:text-stone-200" 
+                            placeholder="Author Name"
+                            autocomplete="off"
+                        >
+                    </div>
                 </div>
+                <!-- Close Sidebar Button -->
+                <button onclick="app.toggleSidebar()" class="text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 self-start p-1" title="Hide Sidebar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
             </div>
             
             <!-- Data Safety Note -->
@@ -261,7 +298,7 @@
                     </button>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="app.triggerLoad(false)" class="py-2 text-xs font-sans text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded border border-transparent hover:border-stone-200 dark:hover:border-stone-700" title="Import JSON">
+                    <button onclick="app.triggerImport()" class="py-2 text-xs font-sans text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded border border-transparent hover:border-stone-200 dark:hover:border-stone-700" title="Import JSON">
                         📥 Import
                     </button>
                     <button onclick="app.openNewWindow()" class="py-2 text-xs font-sans text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded border border-transparent hover:border-stone-200 dark:hover:border-stone-700" title="Open New Window">
@@ -269,13 +306,11 @@
                     </button>
                 </div>
                 
-                <div class="pt-2 grid grid-cols-2 gap-2">
-                     <button onclick="app.toggleTheme()" class="w-full py-2 text-xs font-sans text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors flex items-center justify-center gap-1" title="Switch Light/Dark Mode">
-                        <span id="theme-icon-container">
-                             <!-- Icon injected by JS -->
-                        </span>
+                <div class="pt-2 flex gap-2">
+                     <button onclick="app.toggleTheme()" class="flex-1 py-2 text-xs font-sans text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Switch Light/Dark Mode">
+                        <span id="theme-btn-text">Light Mode</span>
                      </button>
-                     <button onclick="app.exitToPortal()" class="w-full py-2 text-xs font-sans text-stone-400 hover:text-red-500 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Exit to Home">
+                     <button onclick="app.exitToPortal()" class="px-3 py-2 text-xs font-sans text-stone-400 hover:text-red-500 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Exit to Home">
                         Exit
                      </button>
                 </div>
@@ -284,10 +319,17 @@
         </aside>
 
         <!-- Main Editor -->
-        <main class="flex-1 h-screen overflow-y-auto relative bg-paper dark:bg-stone-950 cursor-text transition-colors" id="editor-container">
+        <main class="flex-1 h-screen overflow-y-auto relative bg-paper dark:bg-stone-950 cursor-text transition-colors w-full" id="editor-container">
             
             <!-- Sticky Toolbar -->
-            <div class="sticky top-0 z-10 bg-paper/95 dark:bg-stone-950/95 backdrop-blur border-b border-stone-100 dark:border-stone-800 px-8 py-3 flex items-center gap-2 select-none flex-wrap transition-colors">
+            <div class="sticky top-0 z-10 bg-paper/95 dark:bg-stone-950/95 backdrop-blur border-b border-stone-100 dark:border-stone-800 px-4 md:px-8 py-3 flex items-center gap-2 select-none flex-wrap transition-colors">
+                <!-- Menu Button (Toggle Sidebar) -->
+                <button onclick="app.toggleSidebar()" class="p-2 mr-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Toggle Sidebar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+
+                <div class="w-px h-5 bg-stone-200 dark:bg-stone-800 mx-1 hidden md:block"></div>
+
                 <button onclick="document.execCommand('undo')" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded transition-colors" title="Undo">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
                 </button>
@@ -313,7 +355,7 @@
             </div>
 
             <!-- Writing Area -->
-            <div class="max-w-3xl mx-auto px-8 pb-32 pt-12">
+            <div class="max-w-3xl mx-auto px-6 md:px-8 pb-32 pt-12">
                 <!-- Auto-expanding Title -->
                 <textarea 
                     id="chapter-title-input" 
@@ -376,7 +418,7 @@
             </div>
         </div>
     </div>
-    
+
     <script>
         const app = {
             data: {
@@ -386,6 +428,8 @@
             },
             currentChapterIndex: 0,
             hasUnsavedChanges: false,
+            // Sidebar State
+            isSidebarOpen: true,
             // Drag and Drop State
             dragSrcIndex: null,
             dropPosition: null, // 'before' or 'after'
@@ -400,78 +444,19 @@
                     this.updateThemeIcons(false);
                 }
 
-                // Check for saved draft
-                const saved = localStorage.getItem('ledelulu_draft');
-                if (saved) {
-                    try {
-                        this.data = JSON.parse(saved);
-                        if (!this.data.chapters) this.data.chapters = [];
-                        // Show continue button in portal
-                        document.getElementById('btn-continue').classList.remove('hidden');
-                    } catch (e) {
-                        console.error("Data load error", e);
-                        this.resetData();
-                    }
-                } else {
-                    this.resetData();
-                }
-
-                // Initialize Listeners
-                this.setupListeners();
-                
-                // Default View: Portal
-                this.switchView('view-portal');
-            },
-            
-            switchView(viewId) {
-                document.getElementById('view-portal').classList.add('hidden');
-                document.getElementById('view-studio').classList.add('hidden');
-                document.getElementById(viewId).classList.remove('hidden');
-            },
-
-            startNew() {
-                if (this.hasUnsavedChanges && !confirm("Start new story? Unsaved changes to current draft will be lost.")) {
-                    return;
-                }
-                this.resetData();
-                localStorage.removeItem('ledelulu_draft');
-                document.getElementById('btn-continue').classList.add('hidden');
-                this.enterStudio();
-            },
-
-            continueDraft() {
-                this.enterStudio();
-            },
-            
-            enterStudio() {
-                this.renderSidebar();
-                this.loadChapterToEditor();
-                this.updateSaveUI();
-                this.switchView('view-studio');
-            },
-            
-            exitToPortal() {
-                this.saveToLocal();
-                // If data exists, ensure continue button is shown
+                // Check for local save
                 if (localStorage.getItem('ledelulu_draft')) {
-                    document.getElementById('btn-continue').classList.remove('hidden');
+                    document.getElementById('continue-draft-container').classList.remove('hidden');
                 }
-                this.switchView('view-portal');
-            },
+                
+                // Initialize Sidebar State based on screen width
+                if (window.innerWidth < 768) {
+                    this.isSidebarOpen = false;
+                } else {
+                    this.isSidebarOpen = true;
+                }
+                this.updateSidebarUI();
 
-            resetData() {
-                this.data = {
-                    title: "Untitled Story",
-                    author: "Unknown Author",
-                    chapters: [
-                        { title: "", content: "", date: new Date().toLocaleDateString(), id: Date.now() }
-                    ]
-                };
-                this.currentChapterIndex = 0;
-                this.hasUnsavedChanges = false;
-            },
-
-            setupListeners() {
                 // 1. Auto-resize Title
                 const titleInput = document.getElementById('chapter-title-input');
                 titleInput.addEventListener('input', function() {
@@ -493,6 +478,7 @@
                 });
                 
                 // 4. Toolbar Update Triggers
+                // We update toolbar on click, keyup (cursor move), and selection change
                 bodyInput.addEventListener('mouseup', () => app.updateToolbar());
                 bodyInput.addEventListener('keyup', () => app.updateToolbar());
                 document.addEventListener('selectionchange', () => app.updateToolbar());
@@ -502,6 +488,7 @@
                     if (e.target.id === 'editor-container' || e.target.id === 'bottom-spacer') {
                         const editor = document.getElementById('chapter-body-input');
                         editor.focus();
+                        // Move cursor to end
                         const range = document.createRange();
                         range.selectNodeContents(editor);
                         range.collapse(false);
@@ -515,11 +502,11 @@
                 window.addEventListener('beforeunload', (e) => {
                     if (app.hasUnsavedChanges) {
                         e.preventDefault();
-                        e.returnValue = ''; 
+                        e.returnValue = ''; // Chrome requires returnValue to be set
                     }
                 });
 
-                // 7. Project Meta Inputs
+                // 7. Project Meta Inputs (Sidebar Direct Edit)
                 const projTitle = document.getElementById('project-title-input');
                 const projAuthor = document.getElementById('project-author-input');
                 
@@ -537,7 +524,29 @@
                     app.saveToLocal();
                 });
             },
-
+            
+            toggleSidebar() {
+                this.isSidebarOpen = !this.isSidebarOpen;
+                this.updateSidebarUI();
+            },
+            
+            updateSidebarUI() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebar-overlay');
+                
+                if (this.isSidebarOpen) {
+                    // Open State
+                    sidebar.classList.remove('sidebar-mobile-closed', 'sidebar-desktop-closed');
+                    sidebar.classList.add('sidebar-mobile-open', 'sidebar-desktop-open');
+                    overlay.classList.remove('hidden');
+                } else {
+                    // Closed State
+                    sidebar.classList.remove('sidebar-mobile-open', 'sidebar-desktop-open');
+                    sidebar.classList.add('sidebar-mobile-closed', 'sidebar-desktop-closed');
+                    overlay.classList.add('hidden');
+                }
+            },
+            
             toggleTheme() {
                 if (document.documentElement.classList.contains('dark')) {
                     document.documentElement.classList.remove('dark');
@@ -551,23 +560,23 @@
             },
             
             updateThemeIcons(isDark) {
-                // Sidebar Icon
-                const sidebarIcon = document.getElementById('theme-icon-container');
-                const portalIcon = document.getElementById('portal-theme-icon');
-                const moonSVG = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>';
-                const sunSVG = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>';
+                const icon = document.getElementById('theme-icon-portal');
+                const btnText = document.getElementById('theme-btn-text');
                 
                 if (isDark) {
-                    if(sidebarIcon) sidebarIcon.innerHTML = sunSVG;
-                    if(portalIcon) portalIcon.innerHTML = sunSVG;
+                     // Sun icon for "Switch to Light"
+                    if(icon) icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />';
+                    if(btnText) btnText.textContent = "Light Mode";
                 } else {
-                    if(sidebarIcon) sidebarIcon.innerHTML = moonSVG;
-                    if(portalIcon) portalIcon.innerHTML = moonSVG;
+                    // Moon icon for "Switch to Dark"
+                    if(icon) icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
+                    if(btnText) btnText.textContent = "Dark Mode";
                 }
             },
             
             updateToolbar() {
                 const commands = ['bold', 'italic', 'underline', 'insertUnorderedList', 'insertOrderedList'];
+                
                 commands.forEach(cmd => {
                     const isActive = document.queryCommandState(cmd);
                     const btn = document.getElementById('btn-' + cmd);
@@ -584,18 +593,45 @@
             },
 
             checkUnsaved() {
-                return true; 
+                if (this.hasUnsavedChanges) {
+                    return confirm("You have unsaved changes that haven't been exported to a file yet. Are you sure you want to proceed?");
+                }
+                return true;
             },
 
-            triggerLoad(isPortal) {
-                if (isPortal) {
-                    document.getElementById('portal-upload').click();
-                } else {
-                    document.getElementById('import-upload').click();
-                }
+            startNew() {
+                if (!this.checkUnsaved()) return;
+                
+                this.data = {
+                    title: "Untitled Story",
+                    author: "Unknown Author",
+                    chapters: [
+                        { title: "", content: "", date: new Date().toLocaleDateString(), id: Date.now() }
+                    ]
+                };
+                this.currentChapterIndex = 0;
+                this.hasUnsavedChanges = false;
+                this.switchView('studio');
+                this.renderSidebar();
+                this.loadChapterToEditor();
+                this.updateSaveUI();
+                this.saveToLocal();
+            },
+            
+            continueDraft() {
+                if (!this.checkUnsaved()) return;
+                this.loadFromLocal();
+                this.switchView('studio');
+                this.renderSidebar();
+                this.loadChapterToEditor();
             },
 
             loadFromFile(input) {
+                if (!this.checkUnsaved()) {
+                    input.value = ''; // Reset input
+                    return;
+                }
+                
                 const file = input.files[0];
                 if (!file) return;
                 
@@ -606,21 +642,41 @@
                         this.data = json;
                         this.currentChapterIndex = 0;
                         this.hasUnsavedChanges = false;
-                        
+                        this.switchView('studio');
+                        this.renderSidebar();
+                        this.loadChapterToEditor();
+                        this.updateSaveUI();
                         this.saveToLocal();
-                        // If loaded from portal, enter studio
-                        if (document.getElementById('view-portal').classList.contains('hidden') === false) {
-                            this.enterStudio();
-                        } else {
-                            this.enterStudio(); // Refresh UI if already in studio
-                        }
-                        
                     } catch (err) {
                         alert("Invalid file format.");
                     }
                 };
                 reader.readAsText(file);
-                input.value = '';
+            },
+
+            exitToPortal() {
+                if (!this.checkUnsaved()) return;
+                this.switchView('portal');
+                // We re-check for draft to show the button if they exited
+                if (localStorage.getItem('ledelulu_draft')) {
+                    document.getElementById('continue-draft-container').classList.remove('hidden');
+                }
+            },
+
+            switchView(viewName) {
+                document.getElementById('view-portal').classList.add('hidden');
+                document.getElementById('view-studio').classList.add('hidden');
+                document.getElementById(`view-${viewName}`).classList.remove('hidden');
+                
+                if (viewName === 'studio') {
+                    // Reset sidebar state on desktop/mobile
+                     if (window.innerWidth < 768) {
+                        this.isSidebarOpen = false;
+                    } else {
+                        this.isSidebarOpen = true;
+                    }
+                    this.updateSidebarUI();
+                }
             },
 
             // --- DRAG AND DROP HANDLERS ---
@@ -631,6 +687,8 @@
                 app.dragSrcIndex = Number(btn.dataset.index);
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/plain', app.dragSrcIndex);
+                
+                // Slight delay to add class so the drag image is standard, but the element fades
                 setTimeout(() => btn.classList.add('dragging'), 0);
             },
 
@@ -642,6 +700,7 @@
                 const rect = btn.getBoundingClientRect();
                 const relY = e.clientY - rect.top;
                 
+                // Determine insertion point: Top half -> Before, Bottom half -> After
                 if (relY > rect.height / 2) {
                     btn.classList.add('drag-over-bottom');
                     btn.classList.remove('drag-over-top');
@@ -651,7 +710,12 @@
                     btn.classList.remove('drag-over-bottom');
                     app.dropPosition = 'before';
                 }
+                
                 return false;
+            },
+
+            handleDragEnter(e) {
+                // handled by dragOver styling
             },
 
             handleDragLeave(e) {
@@ -675,18 +739,32 @@
                     
                     if (fromIndex !== toIndex) {
                         const chapters = app.data.chapters;
+                        // Keep track of active chapter ID to maintain selection
                         const activeChapterId = chapters[app.currentChapterIndex]?.id;
                         
+                        // Calculate final insertion index
+                        // Remove item first
                         const [item] = chapters.splice(fromIndex, 1);
-                        if (fromIndex < toIndex) toIndex--;
-                        if (app.dropPosition === 'after') toIndex++;
                         
+                        // If we removed an item before the target, the target index shifts down by 1
+                        if (fromIndex < toIndex) {
+                            toIndex--;
+                        }
+                        
+                        // If drop position is 'after', we increment target index to insert after it
+                        if (app.dropPosition === 'after') {
+                            toIndex++;
+                        }
+                        
+                        // Insert item
                         chapters.splice(toIndex, 0, item);
                         
+                        // Restore Active Selection
                         if (activeChapterId) {
                             const newIndex = chapters.findIndex(c => c.id === activeChapterId);
                             if (newIndex !== -1) app.currentChapterIndex = newIndex;
                         } else {
+                            // If active chapter was somehow lost (shouldn't happen), select the moved one
                             app.currentChapterIndex = toIndex;
                         }
                         
@@ -700,7 +778,7 @@
             },
 
             renderSidebar() {
-                // Update editable inputs
+                // Update editable inputs with current data
                 document.getElementById('project-title-input').value = this.data.title;
                 document.getElementById('project-author-input').value = this.data.author;
                 
@@ -711,9 +789,11 @@
                     const btn = document.createElement('button');
                     const isActive = index === this.currentChapterIndex;
                     
+                    // Add Drag Properties
                     btn.setAttribute('draggable', 'true');
                     btn.dataset.index = index;
                     
+                    // Listeners
                     btn.addEventListener('dragstart', app.handleDragStart);
                     btn.addEventListener('dragover', app.handleDragOver);
                     btn.addEventListener('dragleave', app.handleDragLeave);
@@ -725,6 +805,7 @@
                         ? 'bg-stone-200 dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-semibold' 
                         : 'text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
                     }`;
+                    // REMOVED AUTO NUMBERING
                     btn.textContent = chapter.title || 'Untitled Chapter';
                     btn.onclick = () => app.selectChapter(index);
                     list.appendChild(btn);
@@ -732,9 +813,17 @@
             },
 
             selectChapter(index) {
+                // We don't need checkUnsaved here because switching chapters keeps us in the same "Project"
+                // which is covered by saveToLocal()
                 this.currentChapterIndex = index;
                 this.renderSidebar(); 
                 this.loadChapterToEditor();
+                
+                // On mobile, close sidebar after selection for better UX
+                if (window.innerWidth < 768) {
+                    this.isSidebarOpen = false;
+                    this.updateSidebarUI();
+                }
             },
 
             addChapter() {
@@ -750,20 +839,15 @@
                 this.renderSidebar();
                 this.loadChapterToEditor();
                 this.saveToLocal();
+                
+                 // On mobile, close sidebar after adding to write
+                if (window.innerWidth < 768) {
+                    this.isSidebarOpen = false;
+                    this.updateSidebarUI();
+                }
             },
 
             loadChapterToEditor() {
-                // Safety check
-                if (this.data.chapters.length === 0) {
-                     this.data.chapters.push({ title: "", content: "", date: "", id: Date.now() });
-                     this.currentChapterIndex = 0;
-                }
-                
-                // Bound check
-                if (this.currentChapterIndex >= this.data.chapters.length) {
-                    this.currentChapterIndex = this.data.chapters.length - 1;
-                }
-
                 const chapter = this.data.chapters[this.currentChapterIndex];
                 const titleInput = document.getElementById('chapter-title-input');
                 const dateInput = document.getElementById('chapter-date-input');
@@ -773,6 +857,7 @@
                 dateInput.value = chapter.date || "";
                 bodyInput.innerHTML = chapter.content || "";
                 
+                // Trigger resize
                 titleInput.style.height = 'auto';
                 titleInput.style.height = titleInput.scrollHeight + 'px';
             },
@@ -783,6 +868,7 @@
                 const content = document.getElementById('chapter-body-input').innerHTML;
                 
                 if (this.data.chapters[this.currentChapterIndex]) {
+                    // Check if actually changed to avoid triggering dirty state on mere clicks
                     const currentChap = this.data.chapters[this.currentChapterIndex];
                     if (currentChap.title !== title || currentChap.content !== content || currentChap.date !== date) {
                          currentChap.title = title;
@@ -801,6 +887,13 @@
                 localStorage.setItem('ledelulu_draft', JSON.stringify(this.data));
             },
             
+            loadFromLocal() {
+                const saved = localStorage.getItem('ledelulu_draft');
+                if (saved) {
+                    this.data = JSON.parse(saved);
+                }
+            },
+            
             updateSaveUI() {
                 const btn = document.getElementById('btn-save-project');
                 if (this.hasUnsavedChanges) {
@@ -815,6 +908,7 @@
             },
 
             // --- EXPORT MANAGER ---
+
             openExportModal() {
                 const modal = document.getElementById('export-modal');
                 const list = document.getElementById('export-chapter-list');
@@ -834,7 +928,7 @@
                     div.className = 'flex items-center gap-3 p-2 hover:bg-stone-50 dark:hover:bg-stone-800 rounded transition-colors';
                     div.innerHTML = `
                         <input type="checkbox" class="export-checkbox w-4 h-4 accent-stone-900 dark:accent-stone-100 cursor-pointer" id="export-ch-${index}" checked value="${index}">
-                        <label for="export-ch-${index}" class="text-sm font-sans truncate cursor-pointer select-none flex-1 text-stone-700 dark:text-stone-300">${chapter.title || 'Untitled'}</label>
+                        <label for="export-ch-${index}" class="text-sm font-sans truncate cursor-pointer select-none flex-1 text-stone-700 dark:text-stone-300">${index + 1}. ${chapter.title || 'Untitled'}</label>
                     `;
                     list.appendChild(div);
                 });
@@ -884,48 +978,11 @@
                 downloadAnchorNode.click();
                 downloadAnchorNode.remove();
                 
+                // Only reset dirty flag if we exported the whole thing (default)
                 if (data === this.data) {
                     this.hasUnsavedChanges = false;
                     this.updateSaveUI();
                 }
-            },
-
-            importChapters(input) {
-                const file = input.files[0];
-                if (!file) return;
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const json = JSON.parse(e.target.result);
-                        let newChapters = [];
-                        
-                        if (json.chapters && Array.isArray(json.chapters)) {
-                            newChapters = json.chapters;
-                        } else if (Array.isArray(json)) {
-                            newChapters = json;
-                        } else if (json.content && (json.title !== undefined)) {
-                            newChapters = [json];
-                        } else {
-                            throw new Error("Unknown format");
-                        }
-                        
-                        newChapters.forEach(c => c.id = Date.now() + Math.random());
-                        
-                        this.data.chapters = [...this.data.chapters, ...newChapters];
-                        this.hasUnsavedChanges = true;
-                        
-                        this.renderSidebar();
-                        this.updateSaveUI();
-                        this.saveToLocal();
-                        alert(`Successfully imported ${newChapters.length} chapter(s).`);
-                    } catch (err) {
-                        alert("Failed to import: Invalid file format.");
-                        console.error(err);
-                    }
-                    input.value = '';
-                };
-                reader.readAsText(file);
             },
 
             publishHTML(data = this.data) {
@@ -985,6 +1042,7 @@
         h1 { font-family: 'Playfair Display', serif; font-size: 3em; margin-bottom: 10px; color: var(--heading-color); }
         .author { font-style: italic; color: var(--meta-color); }
         
+        /* Accordion Styles */
         .controls { text-align: right; margin-bottom: 20px; font-family: sans-serif; }
         button#sort-btn { background: none; border: 1px solid var(--border-color); color: var(--meta-color); padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.8em; }
         button#sort-btn:hover { color: var(--text-color); border-color: var(--meta-color); }
@@ -1060,6 +1118,57 @@
                 document.body.removeChild(a);
             },
 
+            // --- IMPORT & NEW WINDOW ---
+
+            triggerImport() {
+                document.getElementById('import-upload').click();
+            },
+
+            importChapters(input) {
+                const file = input.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const json = JSON.parse(e.target.result);
+                        let newChapters = [];
+                        
+                        // Handle LeDelulu format (Story Object)
+                        if (json.chapters && Array.isArray(json.chapters)) {
+                            newChapters = json.chapters;
+                        } 
+                        // Handle simple array of chapters
+                        else if (Array.isArray(json)) {
+                            newChapters = json;
+                        } 
+                        // Handle single chapter object
+                        else if (json.content && (json.title !== undefined)) {
+                            newChapters = [json];
+                        } else {
+                            throw new Error("Unknown format");
+                        }
+                        
+                        // Assign new unique IDs to avoid collision
+                        newChapters.forEach(c => c.id = Date.now() + Math.random());
+                        
+                        // Merge
+                        this.data.chapters = [...this.data.chapters, ...newChapters];
+                        this.hasUnsavedChanges = true;
+                        
+                        this.renderSidebar();
+                        this.updateSaveUI();
+                        this.saveToLocal();
+                        alert(`Successfully imported ${newChapters.length} chapter(s).`);
+                    } catch (err) {
+                        alert("Failed to import: Invalid file format.");
+                        console.error(err);
+                    }
+                    input.value = ''; // Reset input to allow re-importing same file
+                };
+                reader.readAsText(file);
+            },
+
             openNewWindow() {
                 window.open(window.location.href, '_blank');
             }
@@ -1067,7 +1176,7 @@
 
         // Initialize
         app.init();
-        window.app = app;
+        window.app = app; // Explicitly attach to window
     </script>
 </body>
 </html>
