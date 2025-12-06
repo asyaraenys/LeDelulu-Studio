@@ -36,4 +36,4 @@ It runs entirely in your browser (offline-first!), meaning no servers see your d
 
 ## 💖 Credits
 
-Built with HTML, CSS, and pure Delusion by Asyaraenys. 
+Built with HTML, CSS, and pure Delusion by © Asyaraenys. 
